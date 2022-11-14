@@ -1,0 +1,31 @@
+{
+  "name": "crudy",
+  "version": "1.0.0",
+  "description": "Serverless low-code platform",
+  "main": "main.js",
+  "scripts": {
+    "dev": "nodemon main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeppaman/crudy.git"
+  },
+  "keywords": [
+    "serverless",
+    "headless",
+    "low-code",
+    "nodejs"
+  ],
+  "author": "Daniele Fontani",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zeppaman/crudy/issues"
+  },
+  "homepage": "https://github.com/zeppaman/crudy#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "mongodb": "^4.11.0"
+  }
+}
