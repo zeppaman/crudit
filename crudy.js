@@ -86,7 +86,7 @@ const crudy= {
 
             
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
-            console.log(requestsFound);
+            
             if(!requestsFound || requestsFound.length!=1){
                 return this.error(response,`request ${action} not found ${requestsFound.length}`) ;
             }

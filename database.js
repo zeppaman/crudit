@@ -9,7 +9,6 @@ let database= {
         return result;
     },
     insert:async function (db, collection, data){
-        console.log(data);
         
         if(data._id!=undefined){
             delete data._id;

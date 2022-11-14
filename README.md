@@ -75,7 +75,7 @@ app.all('/api/handler', async (request, response) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Crudy demo listening on port ${port}`)
 })
 ```
 

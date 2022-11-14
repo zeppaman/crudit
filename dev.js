@@ -39,7 +39,6 @@ crudy.config(function(config){
 crudy.request("register", "post",false,async function(request,loggedUser, settings){
     
     database.init(process.env.DBURL, {});
-    console.log(request)   ;
     let user=request.body;
     
     delete user.token;//
@@ -85,14 +84,11 @@ return {
 
 
 app.all('/api/handler', async (request, response) => {
-  
-    console.log("all called");
-    console.log(request.body);
     return await crudy.run(request,response);
       
 })
 
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Crudy Demo listening on port ${port}`)
 })
