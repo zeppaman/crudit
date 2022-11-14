@@ -1,10 +1,13 @@
-import { Collection, } from "mongodb";
-const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
-import database from "./database";
+// const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
+// const database =require( "./database.js");
+
+import { MongoClient, ServerApiVersion}  from'mongodb';
+import database from "./database.js";
 
 export default {
     name:'datahub',
     database: database,
+    authenticate:true,
     processRequest: async function(dbName, collection,operation, id, data,query, projection){
         let result={};
        switch(operation){
@@ -33,13 +36,14 @@ export default {
         }
         return result;
     },
-    function: async function(request, user, settings){
+    function: async function(request, user, config){
             let collection= request.query.collection;
             if(!collection) throw Error("missing collection");
         
 
-            let collectionSettings= Object.assign(settings,settings[collection]??{});
-            this.database.init(settings.dbUrl ?? process.env.DBURL, settings.dbConfig);
+            let collectionSettings= Object.assign(config.settings,config[collection]??{});
+            console.log(collectionSettings);
+            this.database.init(config.dbUrl ?? process.env.DBURL, config.dbConfig);
 
             
             if(collectionSettings.roles){

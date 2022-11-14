@@ -1,7 +1,12 @@
-import database  from "./database";
-import {IncomingMessage, ServerResponse} from 'http'
-import defaultConfig from './default.js'
-const {  ObjectID} = require('mongodb');
+// const database =require("./database");
+// const {IncomingMessage, ServerResponse} =require('http')
+// const defaultConfig =require( './default.js')
+// const {  ObjectID} = require('mongodb');
+import {ObjectID} from 'mongodb';
+import defaultConfig from './default.js';
+import  {IncomingMessage, ServerResponse} from 'http';
+import database from './database.js';
+
 
 
 let defaultHeaders={"Content-Type": "application/json"};
@@ -10,10 +15,11 @@ let defaultHeaders={"Content-Type": "application/json"};
 const crudy= {
     database: database,
     currentConfig:defaultConfig,
-    request: async function (name, method,func){
+    request: async function (name, method,authenticate,func){
         let request={
             name: name,
             method:method,
+            authenticate:authenticate,
             function: func
         };
         this.currentConfig.requests.push(request);
@@ -27,7 +33,7 @@ const crudy= {
     mapEntity:  async function (entity, config){
         this.currentConfig[entity]=config;
     },
-    createResponse:  function(response: ServerResponse, data): ServerResponse{
+    createResponse:  function(response, data){
         let headers=Object.assign(defaultHeaders,data.headers);
       
         response.writeHead(data.status,headers);
@@ -35,7 +41,7 @@ const crudy= {
         return response.end(json);
         
     },
-    error: function(response: ServerResponse, message): ServerResponse{
+    error: function(response, message){
         return   this.createResponse(response, {
             status:500,
             body:{
@@ -43,7 +49,7 @@ const crudy= {
             }
         });
     },
-    ok:  function(response: ServerResponse, payload): ServerResponse{
+    ok:  function(response, payload){
         return  this.createResponse(response, {
             status:200,
             headers:{
@@ -68,7 +74,7 @@ const crudy= {
     },
     
 
-    run: async  function(request,response: ServerResponse){
+    run: async  function(request,response){
        
         const start = Date.now()
        
@@ -76,30 +82,36 @@ const crudy= {
         try
         {
             let action= request.query.action ?? 'datahub';
-            let user=await this.performAuthetication(request);// default fallback to an anonymous user
-            this.loadConfig();
+           
 
             
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
+            console.log(requestsFound);
             if(!requestsFound || requestsFound.length!=1){
-                return this.error(response,`request ${action} not found`) ;
+                return this.error(response,`request ${action} not found ${requestsFound.length}`) ;
             }
+
             let requestToExec=requestsFound[0];
+            let user=requestToExec.authenticate ? await this.performAuthetication(request):this.currentConfig.settings.anonymousUser;// default fallback to an anonymous user
+            this.loadConfig();
             
             let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
             try
             {
-                
-                payload.data=await requestToExec.function({query:request.query,
-                headers: request.headers,
-                body: request.body,
-                method:request.method,
-                }, user, this.currentConfig);
+                //console.log("calling", request,user,this.currentConfig);
+                let result=await requestToExec.function({query:request.query,
+                    headers: request.headers,
+                    body: request.body,
+                    method:request.method,
+                    }, user, this.currentConfig);
+
+                payload.data=result;
                 
             }
             catch (err) {
                 payload.hasError=true;
                 payload.error=err.message;
+                payload.stack=err.stack;
                 if(err.name && err.name.length==3 ){
                     payload.status=Number(err.name);
                 }

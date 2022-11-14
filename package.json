@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Serverless low-code platform",
   "main": "main.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon main.js"
+    "dev": "nodemon dev.js"
   },
   "repository": {
     "type": "git",
@@ -21,11 +22,25 @@
   "bugs": {
     "url": "https://github.com/zeppaman/crudy/issues"
   },
+  "module": "commonjs",
   "homepage": "https://github.com/zeppaman/crudy#readme",
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "@types/node": "^18.11.9",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
+    "typescript": "^4.8.4"
   },
   "dependencies": {
+    "body-parser": "^1.20.1",
+    "dotenv": "^16.0.3",
     "mongodb": "^4.11.0"
+  },
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "strict": true,
+    "target": "es2020"
   }
 }
