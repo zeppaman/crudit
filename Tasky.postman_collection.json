@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "480373e0-24cc-4bc1-a355-3dfbcf5cc6ce",
+		"name": "Tasky",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2763815"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"token\": \"unlock\",\r\n    \"password\":\"mypass\",\r\n    \"username\":\"testuser\",\r\n    \"name\":\"My Name\",\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}api/handler?action=register",
+					"host": [
+						"{{host}}api"
+					],
+					"path": [
+						"handler"
+					],
+					"query": [
+						{
+							"key": "action",
+							"value": "register"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\":\"mypass\",\r\n    \"username\":\"testuser\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}api/handler?action=login",
+					"host": [
+						"{{host}}api"
+					],
+					"path": [
+						"handler"
+					],
+					"query": [
+						{
+							"key": "action",
+							"value": "login"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "insert",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"testdata\":\"value\",\r\n    \"testdata2\":\"myvalue2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}api/handler?action=datahub&collection=prova",
+					"host": [
+						"{{host}}api"
+					],
+					"path": [
+						"handler"
+					],
+					"query": [
+						{
+							"key": "action",
+							"value": "datahub"
+						},
+						{
+							"key": "collection",
+							"value": "prova"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}api/handler?action=datahub&collection=prova",
+					"host": [
+						"{{host}}api"
+					],
+					"path": [
+						"handler"
+					],
+					"query": [
+						{
+							"key": "action",
+							"value": "datahub"
+						},
+						{
+							"key": "collection",
+							"value": "prova"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "bf42398034d2498565708b47775734fe5e080215b2f0ec99722dadfaf72885db0d28ab4f49c658c55681287faa5fa7848a9f45ae34840a9d8f612d60e78c8a5b",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:3000/",
+			"type": "string"
+		}
+	]
+}
