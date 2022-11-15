@@ -2,7 +2,7 @@
   "name": "crudit",
   "version": "1.0.3",
   "description": "Serverless low-code platform",
-  "type": "module",
+  "type": "commonjs",
   "main": "./src/index.js",
   "scripts": {
     "dev": "nodemon ./demo/dev.js"
@@ -37,7 +37,8 @@
   "deprecated": false,
   "devDependencies": {
     "express": "^4.18.2",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "vue": "latest"
   },
   "homepage": "https://github.com/zeppaman/crudy#readme",
   "keywords": [

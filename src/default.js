@@ -1,4 +1,4 @@
-const datahub= require("./datahub");
+const datahub= require("./datahub.js");
 module.exports= {
     settings:{
         anonymousUser:{},
