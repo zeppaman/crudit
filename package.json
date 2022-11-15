@@ -2,8 +2,8 @@
   "name": "crudit",
   "version": "1.0.2",
   "description": "Serverless low-code platform",
-  "main": "main.js",
   "type": "module",
+  "main": "./src/index.js",
   "scripts": {
     "dev": "nodemon ./demo/dev.js"
   },
@@ -35,7 +35,6 @@
     "mongodb": "^4.11.0"
   },
   "deprecated": false,
-  "description": "Serverless low-code platform",
   "devDependencies": {
     "express": "^4.18.2",
     "nodemon": "^2.0.20"
@@ -48,16 +47,8 @@
     "nodejs"
   ],
   "license": "MIT",
-  "main": "./src/index.js",
-  "name": "crudit",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zeppaman/crudy.git"
-  },
-  "scripts": {
-    "dev": "nodemon ./demo/dev.js"
-  },
-  
-
-  "version": "1.0.2"
+  }
 }
