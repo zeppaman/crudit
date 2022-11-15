@@ -1,19 +1,11 @@
 {
-  "_from": "crudit",
-  "_id": "crudit@1.0.2",
-  "_inBundle": false,
-  "_integrity": "sha512-KwUqMoKeJvzt3fjGcV2qTwkdwSDcacTwbT6/2vtUbQ5LpEpUbOxig31tid+NJOO9W9Mqwc23SxUe+tIhZz0LVw==",
-  "_location": "/crudit",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "crudit",
-    "name": "crudit",
-    "escapedName": "crudit",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
+  "name": "crudit",
+  "version": "1.0.2",
+  "description": "Serverless low-code platform",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon ./demo/dev.js"
   },
   "_requiredBy": [
     "#USER",
