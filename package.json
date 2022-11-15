@@ -1,6 +1,6 @@
 {
   "name": "crudy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Serverless low-code platform",
   "main": "main.js",
   "type": "module",
