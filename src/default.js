@@ -1,5 +1,5 @@
-import datahub  from "./datahub.js";
-export default {
+const datahub= require("./datahub");
+module.exports= {
     settings:{
         anonymousUser:{},
     },

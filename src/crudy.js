@@ -1,11 +1,8 @@
-// const database =require("./database");
-// const {IncomingMessage, ServerResponse} =require('http')
-// const defaultConfig =require( './default.js')
-// const {  ObjectID} = require('mongodb');
-import {ObjectID} from 'mongodb';
-import defaultConfig from './default.js';
-import  {IncomingMessage, ServerResponse} from 'http';
-import database from './database.js';
+const database =require("./database");
+const {IncomingMessage, ServerResponse} =require('http')
+const defaultConfig =require( './default.js')
+const {  ObjectID} = require('mongodb');
+
 
 
 
@@ -84,6 +81,7 @@ const crudy= {
             let action= request.query.action ?? 'datahub';
            
 
+            console.log(this.currentConfig);
             
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
             
@@ -140,4 +138,4 @@ const crudy= {
 /*
 - load from folder hooks
 */
-export default crudy;
+module.exports=crudy;

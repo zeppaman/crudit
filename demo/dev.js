@@ -1,10 +1,10 @@
 // const database= require('./database.js')
 // const crudy= require('./crudy')
-import database  from "../src/database.js";
-import crudy  from "../src/crudy.js";
-import express from 'express';
-import dotenv from 'dotenv';
-import crypto from 'crypto';
+const database  =require("../src/database.js");
+const crudy  =require( "../src/crudy.js");
+const express =require( 'express');
+const dotenv =require( 'dotenv');
+const crypto =require( 'crypto');
 dotenv.config();
 const app = express()
 const port = 3000

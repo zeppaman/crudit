@@ -1,43 +1,71 @@
 {
-  "name": "crudy",
-  "version": "1.0.0",
+  "_from": "crudit",
+  "_id": "crudit@1.0.2",
+  "_inBundle": false,
+  "_integrity": "sha512-KwUqMoKeJvzt3fjGcV2qTwkdwSDcacTwbT6/2vtUbQ5LpEpUbOxig31tid+NJOO9W9Mqwc23SxUe+tIhZz0LVw==",
+  "_location": "/crudit",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "crudit",
+    "name": "crudit",
+    "escapedName": "crudit",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/crudit/-/crudit-1.0.2.tgz",
+  "_shasum": "8950c15d861b5843f73cb641ed34a5641d3dda72",
+  "_spec": "crudit",
+  "_where": "C:\\Projects\\vue-vercel",
+  "author": {
+    "name": "Daniele Fontani"
+  },
+  "bugs": {
+    "url": "https://github.com/zeppaman/crudy/issues"
+  },
+  "bundleDependencies": false,
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "module",
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "strict": true,
+    "target": "es2020"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "mongodb": "^4.11.0"
+  },
+  "deprecated": false,
   "description": "Serverless low-code platform",
-  "main": "main.js",
-  "type": "module",
-  "scripts": {
-    "dev": "nodemon ./demo/dev.js"
+  "devDependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zeppaman/crudy.git"
-  },
+  "homepage": "https://github.com/zeppaman/crudy#readme",
   "keywords": [
     "serverless",
     "headless",
     "low-code",
     "nodejs"
   ],
-  "author": "Daniele Fontani",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/zeppaman/crudy/issues"
+  "main": "./src/index.js",
+  "name": "crudit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeppaman/crudy.git"
   },
-  "module": "commonjs",
-  "homepage": "https://github.com/zeppaman/crudy#readme",
-  "devDependencies": {
-    "express": "^4.18.2",
-    "nodemon": "^2.0.20"
+  "scripts": {
+    "dev": "nodemon ./demo/dev.js"
   },
-  "dependencies": {
-    "dotenv": "^16.0.3",
-    "mongodb": "^4.11.0"
-  },
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "preserveConstEnums": true,
-    "strict": true,
-    "target": "es2020"
-  }
+  
+
+  "version": "1.0.2"
 }

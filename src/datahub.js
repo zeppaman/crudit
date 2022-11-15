@@ -1,10 +1,8 @@
-// const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
-// const database =require( "./database.js");
+const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
+const database =require( "./database.js");
 
-import { MongoClient, ServerApiVersion}  from'mongodb';
-import database from "./database.js";
 
-export default {
+const datahub= {
     name:'datahub',
     database: database,
     authenticate:true,
@@ -74,3 +72,5 @@ export default {
     }
     
 }
+
+module.exports=datahub;
