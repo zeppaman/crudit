@@ -65,9 +65,9 @@ export default {
             let data=request.body;
             let userQuery=JSON.parse(request.query.query?? JSON.stringify(collectionSettings.defaultQuery) ?? '{}');
             let query=Object.assign(userQuery, collectionSettings.queryOverride??{});
-            let projection=Object.assign(collectionSettings.projectionBase ?? {},query.projection, collectionSettings.projectionOverride??{});
+            let projection=Object.assign(collectionSettings.projectionBase ?? {},JSON.parse(request.query.projection,'{}'), collectionSettings.projectionOverride??{});
             
-            let result=await this.processRequest(dbName, collection,request.method,id, data,query, projection);
+            let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection);
             
             
             return  result;

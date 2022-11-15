@@ -39,7 +39,8 @@ let database= {
         return result;
     },
     search: async function (db, collection, query, projection={}){
-        let result=await this.client.db(db).collection(collection).find(query).toArray();
+        console.log(projection);
+        let result=await this.client.db(db).collection(collection).find(query).project(projection).toArray();
         return result;
     },
     aggregate: async function (db, collection, query){
