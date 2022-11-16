@@ -38,10 +38,15 @@ let database= {
 
         return result;
     },
-    search: async function (db, collection, query, projection={}){
-        console.log(projection);
-        let result=await this.client.db(db).collection(collection).find(query).project(projection).toArray();
-        return result;
+    search: async function (db, collection, query, projection={}, aggregate={}){
+        console.log("quering",query,projection,aggregate);
+        if(aggregate   && Object.keys(aggregate).length === 0  && Object.getPrototypeOf(aggregate) === Object.prototype){
+            return (await this.client.db(db).collection(collection).find(query).project(projection)).toArray();
+        }
+        else
+        {
+            return (await this.client.db(db).collection(collection).aggregate(aggregate)).toArray();
+        }
     },
     aggregate: async function (db, collection, query){
         let result=await this.client.db(db).collection(collection).aggregate(query).toArray();

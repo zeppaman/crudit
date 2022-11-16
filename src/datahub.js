@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
+const { aggregate } = require('./database.js');
 const database =require( "./database.js");
 
 
@@ -6,14 +7,29 @@ const datahub= {
     name:'datahub',
     database: database,
     authenticate:true,
-    processRequest: async function(dbName, collection,operation, id, data,query, projection){
+    parseJSONArray: function(jsonStr){
+        return JSON.parse( jsonStr, function( key, value ){
+            // the reviver function looks for the typed array flag
+            try{
+              if( "flag" in value && value.flag === FLAG_TYPED_ARRAY){
+                // if found, we convert it back to a typed array
+                return new context[ value.constructor ]( value.data );
+              }
+            }catch(e){}
+            
+            // if flag not found no conversion is done
+            return value;
+          });
+          
+    },
+    processRequest: async function(dbName, collection,operation, id, data,query, projection,aggregate){
         let result={};
        switch(operation){
             case "GET": 
             if (id) {
                 result=await this.database.get(dbName,collection,id);
             }else{                
-                result=await this.database.search(dbName,collection,query,projection);
+                result=await this.database.search(dbName,collection,query,projection, aggregate);
             }
             
             break;
@@ -40,7 +56,6 @@ const datahub= {
         
 
             let collectionSettings= Object.assign(config.settings,config[collection]??{});
-            console.log(collectionSettings);
             this.database.init(config.dbUrl ?? process.env.DBURL, config.dbConfig);
 
             
@@ -60,12 +75,13 @@ const datahub= {
             if(id){
                 id=ObjectID(id);
             }
+            
             let data=request.body;
             let userQuery=JSON.parse(request.query.query?? JSON.stringify(collectionSettings.defaultQuery) ?? '{}');
             let query=Object.assign(userQuery, collectionSettings.queryOverride??{});
             let projection=Object.assign(collectionSettings.projectionBase ?? {},JSON.parse(request.query.projection??'{}'), collectionSettings.projectionOverride??{});
-            
-            let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection);
+            let aggregate=this.parseJSONArray(request.query.aggregate??'{}');//Object.assign(collectionSettings.aggregateBase ?? [],this.parseJSONArray(request.query.aggregate??'{}'), collectionSettings.aggregateOverride??[]);
+            let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection,aggregate);
             
             
             return  result;

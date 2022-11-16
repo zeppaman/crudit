@@ -81,7 +81,6 @@ const crudy= {
             let action= request.query.action ?? 'datahub';
            
 
-            console.log(this.currentConfig);
             
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
             
