@@ -1,15 +1,22 @@
 // const database= require('./database.js')
 // const crudy= require('./crudy')
-const database  =require("../src/database.js");
-const crudy  =require( "../src/crudy.js");
-const express =require( 'express');
-const dotenv =require( 'dotenv');
-const crypto =require( 'crypto');
+// const database  =require("../src/database.mjs");
+// const crudy  =require( "../src/crudy.mjs");
+// const express =require( 'express');
+// const dotenv =require( 'dotenv');
+// const crypto =require( 'crypto');
+
+import database  from "crudit/src/database.mjs";
+import crudy  from  "crudit/src/crudy.mjs";
+import express from  'express';
+import dotenv from  'dotenv';
+import crypto from  'crypto';
+
 dotenv.config();
 const app = express()
-const port = 3000
+const port = 3001
 
-
+console.log("started");
 
 app.use(express.json());
 

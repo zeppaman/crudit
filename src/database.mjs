@@ -1,4 +1,6 @@
-const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
+//const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
+import pkg from 'mongodb';
+const { MongoClient, ServerApiVersion,} = pkg;
 
 
 let database= {
@@ -70,4 +72,5 @@ let database= {
     }
 };
 
-module.exports=database;
+//module.exports=database;
+export default database;

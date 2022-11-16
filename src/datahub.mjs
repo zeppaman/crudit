@@ -1,6 +1,9 @@
-const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
-const { aggregate } = require('./database.js');
-const database =require( "./database.js");
+// const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
+// const { aggregate } = require('crudit/src/database.mjs');
+// const database =require( "crudit/src/database.mjs");
+import pkg from 'mongodb';
+const { MongoClient, ServerApiVersion,ObjectID} = pkg;
+import database from "crudit/src/database.mjs";
 
 
 const datahub= {
@@ -16,36 +19,36 @@ const datahub= {
                 return new context[ value.constructor ]( value.data );
               }
             }catch(e){}
-            
+
             // if flag not found no conversion is done
             return value;
           });
-          
+
     },
     processRequest: async function(dbName, collection,operation, id, data,query, projection,aggregate){
         let result={};
        switch(operation){
-            case "GET": 
+            case "GET":
             if (id) {
                 result=await this.database.get(dbName,collection,id);
-            }else{                
+            }else{
                 result=await this.database.search(dbName,collection,query,projection, aggregate);
             }
-            
+
             break;
-            case "POST": 
+            case "POST":
                 result=await this.database.insert(dbName,collection,data);
             break;
-            case "PUT": 
+            case "PUT":
                 result=await this.database.replace(dbName,collection,id,data);
             break;
-            case "PATCH": 
+            case "PATCH":
                 result=await this.database.patch(dbName,collection,id,data);
             break;
-            case "DELETE": 
+            case "DELETE":
                 result=await this.database.remove(dbName,collection,id);
             break;
-            default: 
+            default:
              throw new Error("not supported method:"+operation);
         }
         return result;
@@ -53,12 +56,12 @@ const datahub= {
     function: async function(request, user, config){
             let collection= request.query.collection;
             if(!collection) throw Error("missing collection");
-        
+
 
             let collectionSettings= Object.assign(config.settings,config[collection]??{});
             this.database.init(config.dbUrl ?? process.env.DBURL, config.dbConfig);
 
-            
+
             if(collectionSettings.roles){
                 let hasRole= (user.roles??[]).some(element => {
                     return collectionSettings.roles.includes(element);
@@ -70,23 +73,24 @@ const datahub= {
                 }
             }
             let dbName= user.database ?? collectionSettings.database;
-            
+
             let id=request.query.id ?? request.body?._id;
             if(id){
                 id=ObjectID(id);
             }
-            
+
             let data=request.body;
             let userQuery=JSON.parse(request.query.query?? JSON.stringify(collectionSettings.defaultQuery) ?? '{}');
             let query=Object.assign(userQuery, collectionSettings.queryOverride??{});
             let projection=Object.assign(collectionSettings.projectionBase ?? {},JSON.parse(request.query.projection??'{}'), collectionSettings.projectionOverride??{});
             let aggregate=this.parseJSONArray(request.query.aggregate??'{}');//Object.assign(collectionSettings.aggregateBase ?? [],this.parseJSONArray(request.query.aggregate??'{}'), collectionSettings.aggregateOverride??[]);
             let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection,aggregate);
-            
-            
+
+
             return  result;
     }
-    
+
 }
 
-module.exports=datahub;
+//module.exports=datahub;
+export default datahub;

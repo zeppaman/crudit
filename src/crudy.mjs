@@ -1,7 +1,13 @@
-const database =require("./database");
-const {IncomingMessage, ServerResponse} =require('http')
-const defaultConfig =require( './default.js')
-const {  ObjectID} = require('mongodb');
+// const database =require("crudit/src/database.mjs");
+// const {IncomingMessage, ServerResponse} =require('http')
+// const defaultConfig =require( 'crudit/src/default.mjs')
+// const {  ObjectID} = require('mongodb');
+
+import database from "crudit/src/database.mjs";
+import {IncomingMessage, ServerResponse} from 'http';
+import defaultConfig from  'crudit/src/default.mjs';
+import {  ObjectID} from 'mongodb';
+
 
 
 
@@ -137,4 +143,5 @@ const crudy= {
 /*
 - load from folder hooks
 */
-module.exports=crudy;
+//module.exports=crudy;
+export default crudy;

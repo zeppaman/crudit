@@ -2,7 +2,8 @@
   "name": "crudit",
   "version": "1.0.5",
   "description": "Serverless low-code platform",
-  "main": "./src/index.js",
+  "main": "./src/index.mjs",
+  "type": "module",
   "scripts": {
     "dev": "nodemon ./demo/dev.js"
   },
