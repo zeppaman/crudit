@@ -27,6 +27,36 @@ const crudy= {
         };
         this.currentConfig.requests.push(request);
     },
+    mutation: async function(name, method=async ()={}) {
+        return(
+            {
+                add: function(name, method){
+                    let mutation={
+                        _id: '',
+                        mutationId: name,
+                        status: '',
+                        dateApplied: method, 
+                        errorMessage: ''
+                    };
+        
+                    await this.database.init();
+        
+                    try {
+                        this.database.patch(db, 'mutations', name, mutation);
+                        return {hasError: false}
+                    } catch (error) {
+                        return { hasError: true, error: error }
+                    }
+                },
+                applyOne: function(name){
+                    //get mutation by name and then execute it
+                },
+                applyAll: function(){
+                    //iterate on mutation collection and execute them all
+                }
+            }
+        );
+    },
     config: async function (func){
         func(this.currentConfig);
     },

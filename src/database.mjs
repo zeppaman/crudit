@@ -61,7 +61,8 @@ let database= {
         };
 
         let mixed=Object.assign(defaultSettings, settings);
-        
+        console.log('aaa', url)
+
         this.client=new MongoClient(url, mixed);
         await this.client.connect();
     },

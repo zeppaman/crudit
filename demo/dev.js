@@ -8,7 +8,7 @@
 
 import database  from "crudit/src/database.mjs";
 import crudy  from  "crudit/src/crudy.mjs";
-import express from  'express';
+import express, { response } from  'express';
 import dotenv from  'dotenv';
 import crypto from  'crypto';
 
@@ -28,7 +28,7 @@ crudy.config(function(config){
 
   //Custom method for login
   crudy.request("login", "post",false,async function(request,loggedUser, settings){
-    database.init(process.env.DBURL, {});
+    await database.init(process.env.DBURL, {});
     let hash= crypto.createHash('md5').update(request.body.password).digest('hex');
     let user= await database.search("global","users",{username:request.body.username, password:hash});
     if(!user || user.length!=1) throw new Error("Wrong username and password");
@@ -45,10 +45,10 @@ crudy.config(function(config){
 //Custom method for register
 crudy.request("register", "post",false,async function(request,loggedUser, settings){
     
-    database.init(process.env.DBURL, {});
+    await database.init(process.env.DBURL, {});
     let user=request.body;
     
-    delete user.token;//
+    delete user.token;
     user.password= crypto.createHash('md5').update(user.password).digest('hex');
     user.db=("c_"+user.username??'sdff').normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
@@ -58,11 +58,12 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
             .replace(/\s+/g, '-');
     user.active=false;
     user= await database.insert("global","users",user); 
+    console.log('user', user)
     return user;
 });
 
 crudy.authorize(async function(request){
-database.init(process.env.DBURL, {});
+await database.init(process.env.DBURL, {});
 let token=request.headers.authorization ?? request.query.authorization;
 let users=await database.aggregate('global','users',[{
     $lookup:

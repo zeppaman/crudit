@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3",
-    "mongodb": "^4.11.0"
+    "mongodb": "^4.11.0",
+    "crudit": "^1.0.6"
   },
   "deprecated": false,
   "devDependencies": {
