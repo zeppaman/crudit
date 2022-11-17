@@ -67,11 +67,11 @@ let database= {
     search: async function (db, collection, query, projection={}, aggregate={}){
         let list=[];
         if(aggregate   && Object.keys(aggregate).length === 0  && Object.getPrototypeOf(aggregate) === Object.prototype){
-            list= (await this.client.db(db).collection(collection).find(query).project(projection)).toArray();
+            list= await this.client.db(db).collection(collection).find(query).project(projection).toArray();
         }
         else
         {
-            list= (await this.client.db(db).collection(collection).aggregate(aggregate)).toArray();
+            list= await this.client.db(db).collection(collection).aggregate(aggregate).toArray();
         }
         this.emit(events.alterList,list);
         list.forEach(element => {
@@ -82,21 +82,17 @@ let database= {
     },
     aggregate: async function (db, collection, query){
         let result=await this.client.db(db).collection(collection).aggregate(query).toArray();
-        this.emit(events.alterListAggregate,list);
-        list.forEach(element => {
+        this.emit(events.alterListAggregate,result);
+        result.forEach(element => {
             this.emit(events.alterItemAggregate,element);    
         });
         return result;
     },
     emit: function(eventName,data){
-        console.log("emit", eventName, data);
         this.emitter.emit(eventName,this,data);
     },
     listen: function(eventName,func){
-        console.log("listening "+eventName );
-        //call function(database,data)
         this.emitter.on(eventName,(database,data)=>{
-            console.log("received");
              func(database,data).then(x=>console.log("done"));
         });
     },
