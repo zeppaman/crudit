@@ -3,7 +3,7 @@
 // const database =require( "crudit/src/database.mjs");
 import pkg from 'mongodb';
 const { MongoClient, ServerApiVersion,ObjectID} = pkg;
-import database from "crudit/src/database.mjs";
+import {database,events} from "crudit/src/database.mjs";
 
 
 const datahub= {
@@ -59,8 +59,16 @@ const datahub= {
 
 
             let collectionSettings= Object.assign(config.settings,config[collection]??{});
-            this.database.init(config.dbUrl ?? process.env.DBURL, config.dbConfig);
+            await this.database.init(config.dbUrl ?? process.env.DBURL, config.dbConfig);
 
+            config.hooks.forEach((x)=>{
+                console.log("hooking "+x.eventName);
+                this.database.listen(x.eventName, async function(database,data){
+                    console.log("hooking "+x.name+" emitted");
+                    
+                    await x.function(database,data,user,config);
+                });
+            })
 
             if(collectionSettings.roles){
                 let hasRole= (user.roles??[]).some(element => {

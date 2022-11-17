@@ -4,8 +4,8 @@ const settings={
     settings:{
         anonymousUser:{},
     },
-    requests:[datahub]
-    
+    requests:[datahub],
+    hooks:[],    
 };
 
 //module.exports= settings;

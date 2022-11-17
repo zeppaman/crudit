@@ -2,37 +2,58 @@
 import pkg from 'mongodb';
 const { MongoClient, ServerApiVersion,} = pkg;
 
+import {EventEmitter} from 'events'
+
+let events={
+    alterQuery:"db.alterquery",
+    beforeSave:"db.beforesave",
+    afterSave:"db.aftersave",    
+    beforeDelete:"db.beforedelete",
+    afterDelete:"db.afterdelete",
+    alterList:"db.alterlist",
+    alterItem:"db.alteritem",
+    beforePatch:"db.alterlist",
+    afterPatch:"db.alteritem",
+};
 
 let database= {
     client:{},
+    emitter:{},
     get: async function (db,collection, id){
+        console.log("changed");
         let result= await this.client.db(db).collection(collection).findOne(id);
-
         return result;
     },
     insert:async function (db, collection, data){
-        
+        this.emit(events.beforeSave,data);
         if(data._id!=undefined){
             delete data._id;
         } 
         let result=await this.client.db(db).collection(collection).insertOne(data);
 
-        return this.get(db,collection,result.insertedId);
+        let saved= await this.get(db,collection,result.insertedId);
+        this.emit(events.afterSave,saved);
+        return saved;
     },
     patch: async function (db, collection, id, data){
-        
+        this.emit(events.beforePatch,data);
         if(data._id!=undefined){
             delete data._id;
         } 
         let result=await this.client.db(db).collection(collection).updateOne({_id: id},{$set: data})
 
-        return this.get(collection,id);
+        let saved= await this.get(db,collection,result.insertedId);
+        this.emit(events.afterPatch,saved);
+        return saved;
     },
     replace: async function (db, collection, id, data){
+        this.emit(events.beforeSave,data);
         data._id=id;
         let result=await this.client.db(db).collection(collection).replaceOne({_id: id}, data)
 
-        return this.get(db,collection,id);
+        let saved= await this.get(db,collection,id);
+        this.emit(events.afterSave,saved);
+        return saved;
     },
     remove: async function(db, collection, id){
 
@@ -53,15 +74,27 @@ let database= {
         let result=await this.client.db(db).collection(collection).aggregate(query).toArray();
         return result;
     },
+    emit: function(eventName,data){
+        console.log("emit", eventName, data);
+        this.emitter.emit(eventName,this,data);
+    },
+    listen: function(eventName,func){
+        console.log("listening "+eventName );
+        //call function(database,data)
+        this.emitter.on(eventName,(database,data)=>{
+            console.log("received");
+             func(database,data).then(x=>console.log("done"));
+        });
+    },
     init: async function(url,settings){
         let defaultSettings={ 
             // useNewUrlParser: true, 
             // useUnifiedTopology: true, 
             // serverApi: ServerApiVersion.v1 
         };
-
+        console.log("init emitter");
         let mixed=Object.assign(defaultSettings, settings);
-        
+        this.emitter= new EventEmitter();
         this.client=new MongoClient(url, mixed);
         await this.client.connect();
     },
@@ -74,3 +107,8 @@ let database= {
 
 //module.exports=database;
 export default database;
+
+export {
+    database,
+    events
+};
