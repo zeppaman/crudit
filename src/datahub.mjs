@@ -3,7 +3,7 @@
 // const database =require( "crudit/src/database.mjs");
 import pkg from 'mongodb';
 const { MongoClient, ServerApiVersion,ObjectID} = pkg;
-import {database,events} from "crudit/src/database.mjs";
+import {database,events} from "./database.mjs";
 
 
 const datahub= {
@@ -94,7 +94,7 @@ const datahub= {
             let aggregate=this.parseJSONArray(request.query.aggregate??'{}');//Object.assign(collectionSettings.aggregateBase ?? [],this.parseJSONArray(request.query.aggregate??'{}'), collectionSettings.aggregateOverride??[]);
             let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection,aggregate);
 
-
+            await this.database.destroy();
             return  result;
     }
 

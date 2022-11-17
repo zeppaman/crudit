@@ -6,8 +6,7 @@
 // const dotenv =require( 'dotenv');
 // const crypto =require( 'crypto');
 
-import {database, events}  from "crudit/src/database.mjs";
-import crudy  from  "crudit/src/crudy.mjs";
+import {database, events}  from "../src/index.mjs";
 import express from  'express';
 import dotenv from  'dotenv';
 import crypto from  'crypto';
@@ -54,6 +53,7 @@ crudy.config(function(config){
     delete user.password;
     delete user.db;
     user.token=newToken;
+    await database.destroy();
     return user;
   });
 
@@ -73,6 +73,7 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
             .replace(/\s+/g, '-');
     user.active=false;
     user= await database.insert("global","users",user); 
+    await database.destroy();
     return user;
 });
 

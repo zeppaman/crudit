@@ -14,6 +14,8 @@ let events={
     alterItem:"db.alteritem",
     beforePatch:"db.alterlist",
     afterPatch:"db.alteritem",
+    alterListAggregate:"db.alterlistaggregate",
+    alterItemAggregate:"db.alteritemaggregate",
 };
 
 let database= {
@@ -22,6 +24,7 @@ let database= {
     get: async function (db,collection, id){
         console.log("changed");
         let result= await this.client.db(db).collection(collection).findOne(id);
+        this.emit(events.alterItem,result);
         return result;
     },
     insert:async function (db, collection, data){
@@ -56,22 +59,33 @@ let database= {
         return saved;
     },
     remove: async function(db, collection, id){
-
+        this.emit(events.beforeDelete,saved);
         let result=await this.client.db(db).collection(collection).deleteOne(id);
-
+        this.emit(events.afterDelete,result);    
         return result;
     },
     search: async function (db, collection, query, projection={}, aggregate={}){
+        let list=[];
         if(aggregate   && Object.keys(aggregate).length === 0  && Object.getPrototypeOf(aggregate) === Object.prototype){
-            return (await this.client.db(db).collection(collection).find(query).project(projection)).toArray();
+            list= (await this.client.db(db).collection(collection).find(query).project(projection)).toArray();
         }
         else
         {
-            return (await this.client.db(db).collection(collection).aggregate(aggregate)).toArray();
+            list= (await this.client.db(db).collection(collection).aggregate(aggregate)).toArray();
         }
+        this.emit(events.alterList,list);
+        list.forEach(element => {
+            this.emit(events.alterItem,element);    
+        });
+        
+        return list;
     },
     aggregate: async function (db, collection, query){
         let result=await this.client.db(db).collection(collection).aggregate(query).toArray();
+        this.emit(events.alterListAggregate,list);
+        list.forEach(element => {
+            this.emit(events.alterItemAggregate,element);    
+        });
         return result;
     },
     emit: function(eventName,data){
