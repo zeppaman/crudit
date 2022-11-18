@@ -41,27 +41,76 @@ The project is work in progress but you can:
 
 ### 1. Change the whole  settings
 
-TBD
+The `config` method give you the whole computed configuration and let you read and change it programmatically. See the example:
+```js
+crudy.config(function(config){
+    config.settings.database='test';
+    config.settings.roles=['owner'];
+  });
+``` 
 
 ### 2. Set configuration for a single entity
 
-TBD
+You can specify settings valid for a single entity. For example you can change the required roles for editing one collection. You can do this by invoking the `configEntity` method.
+```js
+crudy.configEntity('myEntityName',function(config){
+    config.roles=['owner'];
+  });
+``` 
+Settings defined at the entity level takes priority over the global one (entity settings overrides property by property the global settings.) 
 
-### 3. Default mechanism
+### 3. Default and override query
 
-TBD
+The Crudit system implements an override mechanism that applies to queries (in filter, aggregate and projection). You can set a base configuration that are applied by design to all queries. The user can override this settings. Image the `deleted` filter if you implement soft deletion and you want to let the user see their deleted record in some "recicle bin" folder. Alternatively you can  set a configuration that is immutable. For example you can implement a filter by `userId` attribute of the elements to show to the user only their rows.
+
+Configs takes priority as follows:
+
+| Default value | Default value | Overridden by | Overridden by |
+| ------------- | ------------- | ------------- |
+| query | defaultQuery | query   | overrideQuery  |
+| projection | N\A | user value  | overrideProjection |
+| aggregate | defaultAggregate | user value  | overrideAggregation  |
+
+The `override*` values are set in the settings element of configuration but can overriden at entity level.
 
 ## Implement authetication
 
-TBD
+Crudit is designed for support any authentication mechanism or implement it's own. The user management system is supposed to be external to the system. By the way, in the demo there is  a sample implementation of a fully working user managerment (user registration, user login and authentication). Any Oauth2 IAM systems can be easily integrated by Crudit just by resolving the user data using common nodejs library.
 
-## Endpoints
+The method to implement is the following:
 
-### Implement custom endpoint
+```js
+crudy.authorize(async function(request){
+    // implement your business logic here
+    // return the user object with roles
+  return {
+      name:user.name,
+      roles:['owner'],
+      database:user.db
+  };
+});
+```
 
-### Change Status
+##  Implement custom endpoint
+You can implement any custom endpoint by register some new `request` to the system. Any endpoint is a function that takes in input a simplified version of the http request and returns a payload. Endpoints are designed to work only with json requests.
+All results are sent as status `200 OK` ecept if you have an exeption. In case of exceptions, the default status is `500 Internal Server Error`, but you can change it by filling the name field of the `Error` with the status code.
+
+You can use the next code to add an endpoint:
+```js
+//crudy.request("action name", "http method", requires authentication, function to run);
+
+crudy.request("myActionName", "post",false,async function(request,loggedUser, settings){
+  let payload={};
+  //do stuff here
+  return payload;
+});
+```
+The url will be `http://yourapp.xx/yourpath?action=myActionName`.
+If the flag for authentication is set to true, the execution returns `401` if the user is not logged in. 
 
 ## Data Validation
+NOT IMPLEMENTED YET. You can take the issue [Implement data validation]
+(https://github.com/zeppaman/crudy/issues/5) if you find it usefyul.
 
 ## Hook Systems
 The hook system allow to alter data or queries writing custom code snippet. 
@@ -95,6 +144,7 @@ See the example below that adds audit to the entity saved:
 The list of event that you can
 
 # Installation
+Crudit works at low level so it is compatible with most system. In the next examples we provide the condifuration for bare express installation and vercel serverless function.
 
 ## On Express
 See dev.js that's based on express.
@@ -128,7 +178,25 @@ app.listen(port, () => {
 
 ## On Vercel Serverless Function
 
-TBD
+1. run `npm install --save crudit`
+2. create a file called `handler.mjs` in api folder. The path in our local will be `api/handlre.mjs` and the url on vercell will be `http://yourpath/api/handler`
+3. integrate crudit like in the following example:
+```js
+import {crudy,database} from 'crudit' ;
+import {IncomingMessage, ServerResponse} from 'http'
+import crypto from 'crypto'
+
+
+ crudy.config(function(config){
+  config.settings.database='test';
+  config.settings.roles=['owner'];
+});
+
+export default async function handler(request, response) {  
+  return await crudy.run(request,response);
+}
+
+```
 
 
 # Demo

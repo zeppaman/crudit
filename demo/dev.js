@@ -78,7 +78,7 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
 });
 
 crudy.authorize(async function(request){
-database.init(process.env.DBURL, {});
+await database.init(process.env.DBURL, {});
 let token=request.headers.authorization ?? request.query.authorization;
 let users=await database.aggregate('global','users',[{
     $lookup:
