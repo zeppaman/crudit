@@ -66,8 +66,8 @@ The Crudit system implements an override mechanism that applies to queries (in f
 Configs takes priority as follows:
 
 | Default value | Default value | Overridden by | Overridden by |
-| ------------- | ------------- | ------------- |
-| query | defaultQuery | query   | overrideQuery  |
+| ------------- | ------------- | ------------- | ------------- |
+| query         | defaultQuery  | query         | overrideQuery  |
 | projection | N\A | user value  | overrideProjection |
 | aggregate | defaultAggregate | user value  | overrideAggregation  |
 
