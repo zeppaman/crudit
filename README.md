@@ -198,6 +198,22 @@ export default async function handler(request, response) {
 
 ```
 
+# Unit test
+The project incorporates end to end unit test. To run them:
+1. activate the demo
+
+```
+docker-compose up
+# another shell
+npm run dev
+```
+2. run the test
+```
+npm run test
+```
+3. se the output
+
+**note**: the test doesn't delete the data that creates on db but uses, run only on volatile environments.
 
 # Demo
 
