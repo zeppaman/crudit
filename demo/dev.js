@@ -1,12 +1,4 @@
-// const database= require('./database.js')
-// const crudy= require('./crudy')
-// const database  =require("../src/database.mjs");
-// const crudy  =require( "../src/crudy.mjs");
-// const express =require( 'express');
-// const dotenv =require( 'dotenv');
-// const crypto =require( 'crypto');
-
-import {database, events}  from "../src/index.mjs";
+import {database, events, crudy}  from "../src/index.mjs";
 import express from  'express';
 import dotenv from  'dotenv';
 import crypto from  'crypto';
@@ -35,13 +27,13 @@ crudy.config(function(config){
     {
         data.insertedOn=new Date();
         data.insertedBy=username;
-
     }
   });
 
   
   //Custom method for login
   crudy.request("login", "post",false,async function(request,loggedUser, settings){
+    console.log(request.body);
     await database.init(process.env.DBURL, {});
     let hash= crypto.createHash('md5').update(request.body.password).digest('hex');
     let user= await database.search("global","users",{username:request.body.username, password:hash});
@@ -78,8 +70,10 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
 });
 
 crudy.authorize(async function(request){
+    
 await database.init(process.env.DBURL, {});
 let token=request.headers.authorization ?? request.query.authorization;
+
 let users=await database.aggregate('global','users',[{
     $lookup:
     {
@@ -107,8 +101,7 @@ return {
 
 
 app.all('/api/handler', async (request, response) => {
-    return await crudy.run(request,response);
-      
+    return await crudy.run(request,response);    
 })
 
 

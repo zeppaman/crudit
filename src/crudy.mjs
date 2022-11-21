@@ -43,7 +43,6 @@ const crudy= {
     },
     createResponse:  function(response, data){
         let headers=Object.assign(defaultHeaders,data.headers);
-      
         response.writeHead(data.status,headers);
         var json = JSON.stringify(data.body);
         return response.end(json);
