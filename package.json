@@ -1,6 +1,6 @@
 {
   "name": "crudit",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Serverless low-code platform",
   "main": "./src/index.mjs",
   "type": "module",
