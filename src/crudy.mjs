@@ -1,9 +1,3 @@
-// const database =require("crudit/src/database.mjs");
-// const {IncomingMessage, ServerResponse} =require('http')
-// const defaultConfig =require( 'crudit/src/default.mjs')
-// const {  ObjectID} = require('mongodb');
-
-import database from "./database.mjs";
 import defaultConfig from  './default.mjs';
 
 
@@ -11,9 +5,11 @@ import defaultConfig from  './default.mjs';
 let defaultHeaders={"Content-Type": "application/json"};
 
 
+
+
 const crudy= {
-    database: database,
     currentConfig:defaultConfig,
+    loaded: false,
     hook:  function (name, eventName,func){
         let hook={
             name: name,
@@ -23,12 +19,13 @@ const crudy= {
 
         this.currentConfig.hooks.push(hook);
     },
-    request:  function (name, method,authenticate,func){
+    request:  function (name, method,authenticate,func, init=null){
         let request={
             name: name,
             method:method,
             authenticate:authenticate,
-            function: func
+            function: func,
+            init:init
         };
         this.currentConfig.requests.push(request);
     },
@@ -65,8 +62,13 @@ const crudy= {
             body:payload
         });
     },
-    loadConfig: function(){
-        
+    load: async function(){
+        for (const x of this.currentConfig.requests){
+            if(x.init){
+                await x.init(this.currentConfig);
+            }
+        }
+        this.loaded=true;
     },
      performAuthetication: async function(request){
         let user=  {
@@ -82,12 +84,18 @@ const crudy= {
     
 
     run: async  function(request,response){
-       
+
+          
         const start = Date.now()
        
 
         try
         {
+            if(!this.loaded) {
+                await this.load();
+            }     
+          
+
             let action= request.query.action ?? 'datahub';
            
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
@@ -98,7 +106,7 @@ const crudy= {
 
             let requestToExec=requestsFound[0];
             let user=requestToExec.authenticate ? await this.performAuthetication(request):this.currentConfig.settings.anonymousUser;// default fallback to an anonymous user
-            this.loadConfig();
+            
             
             let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
             try
