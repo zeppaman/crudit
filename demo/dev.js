@@ -99,6 +99,20 @@ return {
 });
 
 
+crudy.mutations().add('mutation1', async (database)=>{
+    console.log('i added a mutation first', database)
+});
+
+crudy.mutations().add('mutation2', async (database)=>{
+    console.log('i added a second mutation and run it', database);
+})
+
+await crudy.mutations().appyOne('mutation1');
+
+await crudy.mutations().applyAll();
+
+await crudy.mutations().appyOne('mutation2');
+
 
 app.all('/api/handler', async (request, response) => {
     return await crudy.run(request,response);    

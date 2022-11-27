@@ -6,6 +6,7 @@ const settings={
     },
     requests:[datahub],
     hooks:[],    
+    mutations: []
 };
 
 //module.exports= settings;

@@ -32,6 +32,31 @@ const crudy= {
         };
         this.currentConfig.requests.push(request);
     },
+    mutations: function() {
+        let _this = this;
+        return({
+            add: function(name, mutationFn){
+                let mutation = {
+                    name: name,
+                    function: mutationFn
+                }
+                _this.currentConfig.mutations.push(mutation);
+            },
+            remove: function(name){
+                _this.currentConfig.mutations =  _this.currentConfig.mutatations.filter((m)=>{return m.name != name});
+            },
+            appyOne: function(name){
+                _this.currentConfig.mutations.find((m)=>{return m.name == name}).function(_this.database);
+                //apply a mutation
+            },
+            applyAll: function(){
+                _this.currentConfig.mutations.forEach(mutation => {
+                mutation.function(_this.database); 
+                });
+                //apply all mutations
+            }
+        });
+    },
     config:  function (func){
         func(this.currentConfig);
     },
