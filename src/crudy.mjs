@@ -3,12 +3,8 @@
 // const defaultConfig =require( 'crudit/src/default.mjs')
 // const {  ObjectID} = require('mongodb');
 
-import database from "crudit/src/database.mjs";
-import {IncomingMessage, ServerResponse} from 'http';
-import defaultConfig from  'crudit/src/default.mjs';
-import {  ObjectID} from 'mongodb';
-
-
+import database from "./database.mjs";
+import defaultConfig from  './default.mjs';
 
 
 
@@ -18,7 +14,16 @@ let defaultHeaders={"Content-Type": "application/json"};
 const crudy= {
     database: database,
     currentConfig:defaultConfig,
-    request: async function (name, method,authenticate,func){
+    hook:  function (name, eventName,func){
+        let hook={
+            name: name,
+            eventName:eventName,
+            function: func
+        };
+
+        this.currentConfig.hooks.push(hook);
+    },
+    request:  function (name, method,authenticate,func){
         let request={
             name: name,
             method:method,
@@ -27,43 +32,13 @@ const crudy= {
         };
         this.currentConfig.requests.push(request);
     },
-    mutation: async function(name, method=async ()={}) {
-        return(
-            {
-                add: function(name, method){
-                    let mutation={
-                        _id: '',
-                        mutationId: name,
-                        status: '',
-                        dateApplied: method, 
-                        errorMessage: ''
-                    };
-        
-                    await this.database.init();
-        
-                    try {
-                        this.database.patch(db, 'mutations', name, mutation);
-                        return {hasError: false}
-                    } catch (error) {
-                        return { hasError: true, error: error }
-                    }
-                },
-                applyOne: function(name){
-                    //get mutation by name and then execute it
-                },
-                applyAll: function(){
-                    //iterate on mutation collection and execute them all
-                }
-            }
-        );
-    },
-    config: async function (func){
+    config:  function (func){
         func(this.currentConfig);
     },
     authorize: async function(func){
         this.authorizeFunc=func;
     },
-    mapEntity:  async function (entity, config){
+    mapEntity:   function (entity, config){
         this.currentConfig[entity]=config;
     },
     createResponse:  function(response, data){
@@ -116,8 +91,6 @@ const crudy= {
         {
             let action= request.query.action ?? 'datahub';
            
-
-            
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
             
             if(!requestsFound || requestsFound.length!=1){
@@ -170,8 +143,6 @@ const crudy= {
         }
     }
 };
-/*
-- load from folder hooks
-*/
+
 //module.exports=crudy;
 export default crudy;

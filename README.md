@@ -1,6 +1,19 @@
 # crudy
 Serverless and low code plaform
 
+# Table of Contents
+- [crudy](#crudy)
+- [Start in your local](#start-in-your-local)
+- [Features](#features)
+  * [Configure settings](#configure-settings)
+  * [Implement authetication](#implement-authetication)
+  * [Endpoints](#endpoints)ì
+  * [Data Validation](#data-validation)
+  * [Hook Systems](#hook-systems)
+- [Installation](#installation)
+  * [On Express](#on-express)
+  * [On Vercel Serverless Function](#on-vercel-serverless-function)
+- [Demo](#demo)
 
 # Start in your local
 
@@ -19,7 +32,7 @@ The project is work in progress but you can:
 - [x] Authetication and federation with external systems
 - [x] Perform any crud operation
 - [x] Aggregation and projection support
-- [ ] Hook system
+- [x] Hook system
 - [ ] Computed fields and data augmentation
 - [ ] Data validation
 - [ ] Audit
@@ -49,6 +62,37 @@ TBD
 ### Change Status
 
 ## Data Validation
+
+## Hook Systems
+The hook system allow to alter data or queries writing custom code snippet. 
+
+To add an hook, just use the `hook` method passing the name of the event to be linstened and the function that you want to run. Based on the event type you can hava an item or a list of items as argument.
+
+```js
+crudy.hook('MyHookInvokation','eventName', function);
+```
+The list of the eventNames can be found using `event` constant from `import {events} from 'crudy/database'`.
+
+
+See the example below that adds audit to the entity saved:
+
+```js
+ crudy.hook('audit',events.afterSave,async function(database,data, user, config){
+    let username=user? user.name :'anonymous';
+    console.log("hook triggered");
+    data.updatedOn=new Date();
+    data.updatedBy=username;
+
+    if(!data._id || data._id=="")
+    {
+        data.insertedOn=new Date();
+        data.insertedBy=username;
+
+    }
+  });
+```
+
+The list of event that you can
 
 # Installation
 

@@ -6,15 +6,14 @@
 // const dotenv =require( 'dotenv');
 // const crypto =require( 'crypto');
 
-import database  from "crudit/src/database.mjs";
-import crudy  from  "crudit/src/crudy.mjs";
-import express, { response } from  'express';
+import {database, events}  from "../src/index.mjs";
+import express from  'express';
 import dotenv from  'dotenv';
 import crypto from  'crypto';
 
 dotenv.config();
 const app = express()
-const port = 3001
+const port = 3000
 
 console.log("started");
 
@@ -26,6 +25,21 @@ crudy.config(function(config){
     config.settings.roles=['owner'];
   });
 
+  crudy.hook('audit',events.afterSave,async function(database,data, user, config){
+    let username=user? user.name :'anonymous';
+    console.log("hook triggered");
+    data.updatedOn=new Date();
+    data.updatedBy=username;
+
+    if(!data._id || data._id=="")
+    {
+        data.insertedOn=new Date();
+        data.insertedBy=username;
+
+    }
+  });
+
+  
   //Custom method for login
   crudy.request("login", "post",false,async function(request,loggedUser, settings){
     await database.init(process.env.DBURL, {});
@@ -39,6 +53,7 @@ crudy.config(function(config){
     delete user.password;
     delete user.db;
     user.token=newToken;
+    await database.destroy();
     return user;
   });
 
@@ -58,7 +73,7 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
             .replace(/\s+/g, '-');
     user.active=false;
     user= await database.insert("global","users",user); 
-    console.log('user', user)
+    await database.destroy();
     return user;
 });
 

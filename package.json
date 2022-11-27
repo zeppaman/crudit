@@ -1,11 +1,15 @@
 {
   "name": "crudit",
-  "version": "1.0.6",
+  "version": "1.0.9",
   "description": "Serverless low-code platform",
   "main": "./src/index.mjs",
   "type": "module",
   "scripts": {
-    "dev": "nodemon ./demo/dev.js"
+    "dev": "nodemon -V ./demo/dev.js",
+    "watch": "npm-watch"
+  },
+  "watch": {
+    "dev1": "{src,test}/*.mjs"
   },
   "_requiredBy": [
     "#USER",
@@ -38,7 +42,21 @@
   "deprecated": false,
   "devDependencies": {
     "express": "^4.18.2",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "npm-watch": "^0.11.0"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "**/src/**"
+    ],
+    "ignore": [
+      "node_modules/**/**"
+    ],
+    "legacyWatch": true,
+    "ignoreRoot": [
+      ".git",
+      "node_modules"
+    ]
   },
   "homepage": "https://github.com/zeppaman/crudy#readme",
   "keywords": [

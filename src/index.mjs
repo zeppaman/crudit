@@ -4,9 +4,9 @@
 // const database=require('crudit/src/database.mjs');
 // const defaultConfig=require('crudit/src/default.mjs');
 
-import crudy from 'crudit/src/crudy.mjs';
-import database from 'crudit/src/database.mjs';
-import defaultConfig from 'crudit/src/default.mjs';
+import crudy from './crudy.mjs';
+import {database,events} from './database.mjs';
+import defaultConfig from './default.mjs';
 
 // exports.crudy=crudy;
 // exports.database=database;
@@ -15,5 +15,6 @@ import defaultConfig from 'crudit/src/default.mjs';
 export  {
     crudy,
     database,
-    defaultConfig
+    defaultConfig,
+    events
 }
