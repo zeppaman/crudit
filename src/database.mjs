@@ -22,9 +22,7 @@ let database= {
     client:{},
     emitter:{},
     get: async function (db,collection, id){
-        console.log("changed");
         let result= await this.client.db(db).collection(collection).findOne(id);
-        this.emit(events.alterItem,result);
         return result;
     },
     insert:async function (db, collection, data){
@@ -102,7 +100,6 @@ let database= {
             // useUnifiedTopology: true, 
             // serverApi: ServerApiVersion.v1 
         };
-        console.log("init emitter");
         let mixed=Object.assign(defaultSettings, settings);
         this.emitter= new EventEmitter();
         this.client=new MongoClient(url, mixed);

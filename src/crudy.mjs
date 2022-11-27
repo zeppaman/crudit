@@ -38,12 +38,11 @@ const crudy= {
     authorize: async function(func){
         this.authorizeFunc=func;
     },
-    mapEntity:   function (entity, config){
+    configEntity:   function (entity, config){
         this.currentConfig[entity]=config;
     },
     createResponse:  function(response, data){
         let headers=Object.assign(defaultHeaders,data.headers);
-      
         response.writeHead(data.status,headers);
         var json = JSON.stringify(data.body);
         return response.end(json);

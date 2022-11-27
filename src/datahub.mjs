@@ -54,6 +54,7 @@ const datahub= {
         return result;
     },
     function: async function(request, user, config){
+
             let collection= request.query.collection;
             if(!collection) throw Error("missing collection");
 
