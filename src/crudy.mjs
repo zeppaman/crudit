@@ -80,11 +80,20 @@ const crudy= {
         return user;       
     },
     
-
     run: async  function(request,response){
+        let payload=this.getResponse(request);
+        return  this.createResponse(response, {
+            status:payload.status,
+                headers:{
+                    nope:'nppe'
+                },
+                body:payload
+            });
+    },
+    getResponse: async  function(request){
        
         const start = Date.now()
-       
+        let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
 
         try
         {
@@ -93,53 +102,43 @@ const crudy= {
             let requestsFound= this.currentConfig.requests.filter((x)=>x.name==action);
             
             if(!requestsFound || requestsFound.length!=1){
-                return this.error(response,`request ${action} not found ${requestsFound.length}`) ;
+                throw new Error(`request ${action} not found ${requestsFound.length}`);
             }
 
             let requestToExec=requestsFound[0];
             let user=requestToExec.authenticate ? await this.performAuthetication(request):this.currentConfig.settings.anonymousUser;// default fallback to an anonymous user
             this.loadConfig();
             
-            let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
-            try
-            {
-                //console.log("calling", request,user,this.currentConfig);
-                let result=await requestToExec.function({query:request.query,
-                    headers: request.headers,
-                    body: request.body,
-                    method:request.method,
-                    }, user, this.currentConfig);
+            //console.log("calling", request,user,this.currentConfig);
+            let result=await requestToExec.function({query:request.query,
+                headers: request.headers,
+                body: request.body,
+                method:request.method,
+                }, user, this.currentConfig);
 
-                payload.data=result;
-                
-            }
-            catch (err) {
-                payload.hasError=true;
-                payload.error=err.message;
-                payload.stack=err.stack;
-                if(err.name && err.name.length==3 ){
-                    payload.status=Number(err.name);
-                }
-
-            }
+            payload.data=result;          
 
            
             const stop = Date.now();
             payload.echo.duration=stop-start;
-             return  this.createResponse(response, {
-                        status:payload.status,
-                            headers:{
-                                nope:'nppe'
-                            },
-                            body:payload
-                        });
 
         }
         catch( err)
         {
             console.log(err);
-            return   this.error(response,err.message);
+            payload.hasError=true;            
+            payload.error=err.message;
+            payload.stack=err.stack;
+            if(err.name && err.name.length==3 ){
+                payload.status=Number(err.name);
+            }
+            else
+            {
+                payload.status=500;
+            }
         }
+
+        return payload;
     }
 };
 
