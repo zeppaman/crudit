@@ -17,7 +17,7 @@ crudy.config(function(config){
     config.settings.roles=['owner'];
   });
 
-  crudy.hook('audit',events.afterSave,async function(database,data, user, config){
+  crudy.hook('audit',events.beforeSave,async function(database,data, user, config){
     let username=user? user.name :'anonymous';
     console.log("hook triggered");
     data.updatedOn=new Date();
