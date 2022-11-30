@@ -51,7 +51,8 @@ const crudy= {
                 let mutation = _this.currentConfig.mutations.find((m)=>{return m.name == name && !m.executed});
                 if(mutation){
                     try {
-                        let response = await mutation.function(_this.database);
+                        console.log('_this', _this)
+                        let response = await mutation.function(_this.currentConfig.settings.database);
                         mutation.executed = true;
                         return({ hasError: false, data: response });
                     } catch (error) {
@@ -69,8 +70,7 @@ const crudy= {
                     });
 
                     if(promises.length){
-
-                        let responses = await Promise.all(promises.map((p)=>{return p.function(database)}));
+                        let responses = await Promise.all(promises.map((p)=>{return p.function(_this.currentConfig.settings.database)}));
                         promises.map((p)=>{p.executed = true});
                         return({ hasError: false, data: responses });
                     }else{

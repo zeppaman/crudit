@@ -33,8 +33,7 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3",
-    "mongodb": "^4.11.0",
-    "crudit": "^1.0.6"
+    "mongodb": "^4.11.0"
   },
   "deprecated": false,
   "devDependencies": {
@@ -74,4 +73,3 @@
     "url": "git+https://github.com/zeppaman/crudy.git"
   }
 }
-s
