@@ -53,6 +53,9 @@ const datahub= {
         }
         return result;
     },
+    init: async function(config){
+        await (this.database.dbFactory.init(config.settings.database));
+    },
     function: async function(request, user, config){
 
             let collection= request.query.collection;
@@ -60,7 +63,7 @@ const datahub= {
 
 
             let collectionSettings= Object.assign(config.settings,config[collection]??{});
-            await this.database.init(config.dbUrl ?? process.env.DBURL, config.dbConfig);
+            
 
             config.hooks.forEach((x)=>{
                 console.log("hooking "+x.eventName);
@@ -81,7 +84,7 @@ const datahub= {
                    throw error;
                 }
             }
-            let dbName= user.database ?? collectionSettings.database;
+            let dbName= user.database ?? collectionSettings.database.name;
 
             let id=request.query.id ?? request.body?._id;
             if(id){
@@ -95,7 +98,7 @@ const datahub= {
             let aggregate=this.parseJSONArray(request.query.aggregate??'{}');//Object.assign(collectionSettings.aggregateBase ?? [],this.parseJSONArray(request.query.aggregate??'{}'), collectionSettings.aggregateOverride??[]);
             let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection,aggregate);
 
-            await this.database.destroy();
+            
             return  result;
     }
 

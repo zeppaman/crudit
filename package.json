@@ -1,6 +1,6 @@
 {
   "name": "crudit",
-  "version": "1.0.16",
+  "version": "1.1.0",
   "description": "Serverless low-code platform",
   "main": "./src/index.mjs",
   "type": "module",
@@ -74,3 +74,4 @@
     "url": "git+https://github.com/zeppaman/crudy.git"
   }
 }
+s
