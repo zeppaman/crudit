@@ -100,18 +100,40 @@ return {
 
 
 crudy.mutations().add('mutation1', async (database)=>{
-    console.log('i added a mutation first', database)
+    await database.init(process.env.DBURL, {});
+    return(await database.insert('log', 'test1', {success: true}))
 });
 
 crudy.mutations().add('mutation2', async (database)=>{
-    console.log('i added a second mutation and run it', database);
-})
+    await database.init(process.env.DBURL, {});
+    return(await database.insert('log', 'test2', {success: true}))
+});
 
-await crudy.mutations().appyOne('mutation1');
+crudy.mutations().add('mutation3', async (database)=>{
+    await database.init(process.env.DBURL, {});
+    return(await database.insert('log', 'test3', {success: true}))
+});
 
-await crudy.mutations().applyAll();
 
-await crudy.mutations().appyOne('mutation2');
+let responses = [];
+
+//apply first mutation
+responses.push(await crudy.mutations().appyOne('mutation1'));
+
+//remove second mutation
+responses.push(await crudy.mutations().remove('mutation2'));
+
+//apply third mutation because first is already applied and second is removed
+responses.push(await crudy.mutations().applyAll());
+
+
+//should not apply any of them, they are removed, already applied or inexistent
+responses.push(await crudy.mutations().appyOne('mutation2'));
+responses.push(await crudy.mutations().applyAll());
+responses.push(await crudy.mutations().appyOne('mutation3'));
+responses.push(await crudy.mutations().appyOne('mutationInexistent'));
+
+console.log(responses);
 
 
 app.all('/api/handler', async (request, response) => {

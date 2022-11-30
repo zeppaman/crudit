@@ -38,22 +38,50 @@ const crudy= {
             add: function(name, mutationFn){
                 let mutation = {
                     name: name,
-                    function: mutationFn
+                    function: mutationFn,
+                    executed: false
+                }
+                if(_this.currentConfig.mutations.find((m)=>{return m.name == name})){
+                    this.remove(name);
                 }
                 _this.currentConfig.mutations.push(mutation);
             },
             remove: function(name){
-                _this.currentConfig.mutations =  _this.currentConfig.mutatations.filter((m)=>{return m.name != name});
+                _this.currentConfig.mutations =  _this.currentConfig.mutations.filter((m)=>{return m.name != name});
+                return({hasError: false})
             },
-            appyOne: function(name){
-                _this.currentConfig.mutations.find((m)=>{return m.name == name}).function(_this.database);
-                //apply a mutation
+            appyOne: async function(name){
+                let mutation = _this.currentConfig.mutations.find((m)=>{return m.name == name && !m.executed});
+                if(mutation){
+                    try {
+                        let response = await mutation.function(_this.database);
+                        mutation.executed = true;
+                        return({ hasError: false, data: response });
+                    } catch (error) {
+                        return({ hasError: true, error: error });
+                    }
+                }else{
+                    return({ hasError: true, error: "Mutation not found or already executed" });
+                }
             },
-            applyAll: function(){
-                _this.currentConfig.mutations.forEach(mutation => {
-                mutation.function(_this.database); 
-                });
-                //apply all mutations
+            applyAll: async function(){
+                try {
+                    let promises = [];
+                    _this.currentConfig.mutations.filter((m)=>{return !m.executed}).forEach(mutation => {
+                        promises.push(mutation); 
+                    });
+
+                    if(promises.length){
+
+                        let responses = await Promise.all(promises.map((p)=>{return p.function(database)}));
+                        promises.map((p)=>{p.executed = true});
+                        return({ hasError: false, data: responses });
+                    }else{
+                        return({ hasError: true, error: "No Mutation was registered and not executed" })
+                    }
+                } catch (error) {
+                    
+                }
             }
         });
     },
