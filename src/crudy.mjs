@@ -32,11 +32,12 @@ const crudy= {
     mutations: function() {
         let _this = this;
         return({
-            add: function(name, mutationFn){
+            add: function(name, dbName = false, mutationFn){
                 let mutation = {
                     name: name,
                     function: mutationFn,
-                    executed: false
+                    executed: false,
+                    dbName: dbName
                 }
                 if(_this.currentConfig.mutations.find((m)=>{return m.name == name})){
                     this.remove(name);
@@ -51,8 +52,11 @@ const crudy= {
                 let mutation = _this.currentConfig.mutations.find((m)=>{return m.name == name && !m.executed});
                 if(mutation){
                     try {
-                        console.log('_this', _this)
-                        let response = await mutation.function(_this.currentConfig.settings.database);
+                        let config = _this.currentConfig.settings.database;
+                        if(mutation.dbName){
+                            config.name = mutation.dbName
+                        }
+                        let response = await mutation.function(config);
                         mutation.executed = true;
                         return({ hasError: false, data: response });
                     } catch (error) {
@@ -64,14 +68,17 @@ const crudy= {
             },
             applyAll: async function(){
                 try {
-                    let promises = [];
-                    _this.currentConfig.mutations.filter((m)=>{return !m.executed}).forEach(mutation => {
-                        promises.push(mutation); 
-                    });
-
-                    if(promises.length){
-                        let responses = await Promise.all(promises.map((p)=>{return p.function(_this.currentConfig.settings.database)}));
-                        promises.map((p)=>{p.executed = true});
+                    let mutationToExexute = _this.currentConfig.mutations.filter((m)=>{return !m.executed});
+                    if(mutationToExexute.length){
+                        let responses = [];
+                        for(let i = 0; i<mutationToExexute.length; i++){
+                            let config = _this.currentConfig.settings.database;
+                            if(mutationToExexute[i].dbName){
+                                config.name = mutationToExexute[i].dbName
+                            }
+                            responses.push(await mutationToExexute[i].function(config));
+                        }
+                        mutationToExexute.map((p)=>{p.executed = true});
                         return({ hasError: false, data: responses });
                     }else{
                         return({ hasError: true, error: "No Mutation was registered and not executed" })

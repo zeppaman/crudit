@@ -98,19 +98,19 @@ return {
 });
 
 
-crudy.mutations().add('mutation1', async (database)=>{
-    await database.init(process.env.DBURL, {});
-    return(await database.insert('log', 'test1', {success: true}))
+crudy.mutations().add('mutation1','mutationsDB', async (databaseConfig)=>{
+    await database.dbFactory.init(databaseConfig);
+    return(await database.insert(databaseConfig.name, 'test1', {success: true}))
 });
 
-crudy.mutations().add('mutation2', async (database)=>{
-    await database.init(process.env.DBURL, {});
-    return(await database.insert('log', 'test2', {success: true}))
+crudy.mutations().add('mutation2', false, async (databaseConfig)=>{
+    await database.dbFactory.init(databaseConfig);
+    return(await database.insert(databaseConfig.name, 'test2', {success: true}))
 });
 
-crudy.mutations().add('mutation3', async (database)=>{
-    await database.init(process.env.DBURL, {});
-    return(await database.insert('log', 'test3', {success: true}))
+crudy.mutations().add('mutation3', 'mutationsDB2', async (databaseConfig)=>{
+    await database.dbFactory.init(databaseConfig);
+    return(await database.insert(databaseConfig.name, 'test3', {success: true}))
 });
 
 
