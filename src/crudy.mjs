@@ -1,5 +1,5 @@
 import defaultConfig from  './default.mjs';
-
+import {dbFactory} from './database.mjs';
 
 
 let defaultHeaders={"Content-Type": "application/json"};
@@ -10,10 +10,12 @@ let defaultHeaders={"Content-Type": "application/json"};
 const crudy= {
     currentConfig:defaultConfig,
     loaded: false,
-    hook:  function (name, eventName,func){
+    hook:  function (name, eventName,database,collection,func){
         let hook={
             name: name,
             eventName:eventName,
+            database:database,
+            collection:collection,
             function: func
         };
 
@@ -84,9 +86,10 @@ const crudy= {
     
     run: async  function(request,response){
 
-        let payload=this.getResponse(request);
-        return  this.createResponse(response, {
-            status:payload.status,
+        let payload=await this.getResponse(request);
+
+        return  await this.createResponse(response, {
+            status:payload.status??200,
                 headers:{
                     nope:'nppe'
                 },
@@ -95,6 +98,7 @@ const crudy= {
     },
     getResponse: async  function(request){
        
+      
 
         const start = Date.now()
         let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
@@ -145,6 +149,10 @@ const crudy= {
             {
                 payload.status=500;
             }
+        }
+
+        if(this.currentConfig.settings.database.connectionMode=='recreate'){
+            dbFactory.destroy();
         }
 
         return payload;
