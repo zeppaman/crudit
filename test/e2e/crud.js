@@ -28,6 +28,8 @@ let token="null";
                 password:password,
                 name: entity
             },{action:'register'});
+            expect(response.status).to.not.be.null;
+            expect(response.status).to.be.equal(200);
 
         });
         it('get user token', async function () {
@@ -35,13 +37,14 @@ let token="null";
                 username: username,
                 password:password
             },{action:'login'});
+            console.log(response.data);
             let token=response.data.data.token;
             instance.defaults.headers.common['Authorization']=token;
         });
        
 
     });
-
+    
     describe('CRUD', async function () {
       
       let saved={};

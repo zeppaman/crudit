@@ -17,11 +17,14 @@ app.use(express.json());
 // configure settings
 crudy.config(function(config){
     config.settings.database.name='test';
-    config.settings.roles=['owner']; //SHOULD BE inside database!
+    config.settings.database.roles=['owner']; //SHOULD BE inside database!
     config.settings.database.url=process.env.CRUDIT_DBURL;
   });
 
-  crudy.hook('audit',events.beforeSave,async function(database,data, user, config){
+  crudy.hook('audit',events.beforeSave,null,null,async function(database,db,collection,data,user,config){
+    // console.log({
+    //     data:data, user:user,db:db, collection:collection, config:config
+    // });
     let username=user? user.name :'anonymous';
     console.log("hook triggered");
     data.updatedOn=new Date();
@@ -53,7 +56,7 @@ crudy.config(function(config){
 
 //Custom method for register
 crudy.request("register", "post",false,async function(request,loggedUser, settings){
-    
+  
 
     let user=request.body;
     
@@ -67,6 +70,7 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
             .replace(/\s+/g, '-');
     user.active=false;
     user= await database.insert("global","users",user); 
+    
     return user;
 });
 
