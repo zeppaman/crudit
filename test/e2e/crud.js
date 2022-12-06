@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiJsonPattern from 'chai-json-pattern';
 import {client,instance} from '../client.js';
+import moment from 'moment';
 
 
 chai.use(chaiJsonPattern.default);
@@ -154,3 +155,30 @@ let token="null";
 
     });
   
+
+
+    describe('Hooks', async function () {
+      
+      let saved={};
+      it('insert', async function () {
+            let toSave={field:"myfield", date:new Date(), int:23,number:23.4};
+            let result=await client.insertOrUpdate(entity, toSave);
+            saved=result.data;
+            expect(saved._id).to.not.be.null;
+            expect(saved.insertedOn).to.not.be.null;
+            expect(saved.updatedOn).to.not.be.null;
+            expect(saved.updatedOn).to.be.equal(saved.insertedOn);
+      });
+
+      it('update', async function () {
+        let toSave=saved;
+        toSave.field="myfield2";
+        let result=await client.insertOrUpdate(entity, toSave);
+        saved=result.data;
+        expect(saved._id).to.not.be.null;
+        expect(saved.insertedOn).to.not.be.null;
+        expect(saved.updatedOn).to.not.be.null;
+        expect(saved.updatedOn).to.be.not.equal(saved.insertedOn);
+        expect(moment(saved.updatedOn).valueOf()).to.be.greaterThan(moment(saved.insertedOn).valueOf());
+      });
+    });
