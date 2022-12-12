@@ -7,7 +7,7 @@ Serverless and low code plaform
 - [Features](#features)
   * [Configure settings](#configure-settings)
   * [Implement authetication](#implement-authetication)
-  * [Endpoints](#endpoints)ì
+  * [Endpoints](#endpoints)
   * [Data Validation](#data-validation)
   * [Hook Systems](#hook-systems)
 - [Installation](#installation)
