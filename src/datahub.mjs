@@ -46,6 +46,7 @@ const datahub= {
                 result=await this.database.patch(dbName,collection,id,data);
             break;
             case "DELETE":
+                console.log("DELETE", id);
                 result=await this.database.remove(dbName,collection,id);
             break;
             default:
@@ -98,7 +99,6 @@ const datahub= {
             let aggregate=this.parseJSONArray(request.query.aggregate??'{}');//Object.assign(collectionSettings.aggregateBase ?? [],this.parseJSONArray(request.query.aggregate??'{}'), collectionSettings.aggregateOverride??[]);
             let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection,aggregate);
 
-            
             return  result;
     }
 

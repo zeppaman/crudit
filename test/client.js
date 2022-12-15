@@ -40,9 +40,9 @@ simplifyResponse:   function(response){
     return  this.simplifyResponse(  await this.apiCall(url,'PATCH',data,{collection: entity}));
 
   },
-  remove:  async function (entity, data){
-    
-    return  (await this.apiCall(url,'DELETE',params,{id: data._id,collection: entity})).status==200;
+  remove:  async function (entity, id){
+    let data=await this.apiCall(url,'DELETE',null,{id: id,collection: entity});
+    return  (data).status==200;
 
   },
   get:  async function (entity, eid){
