@@ -54,43 +54,58 @@ let database= {
     emitter: new EventEmitter(),
     get: async function (db,collection, id){
         let result=await  (await this.dbFactory.getDb(db)).collection(collection).findOne(id);
+        this.emit(events.alterItem,db,collection,result);  
         return result;
     },
     insert:async function (db, collection, data){
-        this.emit(events.beforeSave,data);
+        this.emit(events.beforeSave,db,collection,data);
         if(data._id!=undefined){
             delete data._id;
         } 
         let result=await (await this.dbFactory.getDb(db)).collection(collection).insertOne(data);
-
+        
         let saved= await this.get(db,collection,result.insertedId);
-        this.emit(events.afterSave,saved);
+        this.emit(events.afterSave,db,collection,saved);
         return saved;
     },
     patch: async function (db, collection, id, data){
-        this.emit(events.beforePatch,data);
+        this.emit(events.beforePatch,db,collection,data);
         if(data._id!=undefined){
             delete data._id;
         } 
         let result=await (await this.dbFactory.getDb(db)).collection(collection).updateOne({_id: id},{$set: data})
 
         let saved= await this.get(db,collection,result.insertedId);
-        this.emit(events.afterPatch,saved);
+        this.emit(events.afterPatch,db,collection,saved);
         return saved;
     },
     replace: async function (db, collection, id, data){
-        this.emit(events.beforeSave,data);
+        this.emit(events.beforeSave,db,collection,data);
         data._id=id;
         let result=await (await this.dbFactory.getDb(db)).collection(collection).replaceOne({_id: id}, data)
 
         let saved= await this.get(db,collection,id);
-        this.emit(events.afterSave,saved);
+        this.emit(events.afterSave,db,collection,saved);
         return saved;
     },
     remove: async function(db, collection, id){
-        this.emit(events.beforeDelete,saved);
-        let result=await (await this.dbFactory.getDb(db)).collection(collection).deleteOne(id);
-        this.emit(events.afterDelete,result);    
+        this.emit(events.beforeDelete,id);
+        let _id=id;
+        if(typeof fruits == "object"){
+            if(id._id){
+                _id=id._id;
+            }else{
+                throw new Error("Onbject doesnt have an _id");
+            }
+        }
+
+        if(!_id){        
+            throw new Error("Unable to delete an entity without an ID");
+        }
+
+        this.emit(events.beforeDelete,id);
+        let result=await (await this.dbFactory.getDb(db)).collection(collection).deleteOne({ "_id" : _id });
+        this.emit(events.afterDelete,db,collection,result);    
         return result;
     },
     search: async function (db, collection, query, projection={}, aggregate={}){
@@ -102,28 +117,28 @@ let database= {
         {
             list=await  (await this.dbFactory.getDb(db)).collection(collection).aggregate(aggregate).toArray();
         }
-        this.emit(events.alterList,list);
+        this.emit(events.alterList,db,collection,list);
         list.forEach(element => {
-            this.emit(events.alterItem,element);    
+            this.emit(events.alterItem,db,collection,element);    
         });
         
         return list;
     },
     aggregate: async function (db, collection, query){
         let result=await (await this.dbFactory.getDb(db)).collection(collection).aggregate(query).toArray();
-        this.emit(events.alterListAggregate,result);
+        this.emit(events.alterListAggregate,db,collection,result);
         result.forEach(element => {
-            this.emit(events.alterItemAggregate,element);    
+            this.emit(events.alterItemAggregate,db,collection,element);    
         });
         return result;
     },
-    emit: function(eventName,data){
+    emit: function(eventName,db,collection,data){
       
-        this.emitter.emit(eventName,this,data);
+        this.emitter.emit(eventName,this,db,collection,data);
     },
     listen: function(eventName,func){
-        this.emitter.on(eventName,(database,data)=>{
-             func(database,data).then(x=>console.log("done"));
+        this.emitter.on(eventName,(database,db,collection,data)=>{
+             func(database,db,collection,data).then(x=>{});
         });
     },
 };

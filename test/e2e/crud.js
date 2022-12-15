@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiJsonPattern from 'chai-json-pattern';
 import {client,instance} from '../client.js';
+import moment from 'moment';
 
 
 chai.use(chaiJsonPattern.default);
@@ -28,6 +29,8 @@ let token="null";
                 password:password,
                 name: entity
             },{action:'register'});
+            expect(response.status).to.not.be.null;
+            expect(response.status).to.be.equal(200);
 
         });
         it('get user token', async function () {
@@ -35,13 +38,14 @@ let token="null";
                 username: username,
                 password:password
             },{action:'login'});
+            console.log(response.data);
             let token=response.data.data.token;
             instance.defaults.headers.common['Authorization']=token;
         });
        
 
     });
-
+    
     describe('CRUD', async function () {
       
       let saved={};
@@ -149,5 +153,39 @@ let token="null";
         });
       });
 
+      it('delete', async function () {
+        let result=await client.remove(entity,saved._id);
+        expect(result).to.be.equal(true);
+      });
     });
   
+
+
+    describe('Hooks', async function () {
+      
+      let saved={};
+      it('insert', async function () {
+            let toSave={field:"myfield", date:new Date(), int:23,number:23.4};
+            let result=await client.insertOrUpdate(entity, toSave);
+            saved=result.data;
+            expect(saved._id).to.not.be.null;
+            expect(saved.insertedOn).to.not.be.null;
+            expect(saved.updatedOn).to.not.be.null;
+            expect(saved.updatedOn).to.be.equal(saved.insertedOn);
+      });
+
+      it('update', async function () {
+        let toSave=saved;
+        toSave.field="myfield2";
+        let result=await client.insertOrUpdate(entity, toSave);
+        saved=result.data;
+        expect(saved._id).to.not.be.null;
+        expect(saved.insertedOn).to.not.be.null;
+        expect(saved.updatedOn).to.not.be.null;
+        expect(saved.updatedOn).to.be.not.equal(saved.insertedOn);
+        expect(moment(saved.updatedOn).valueOf()).to.be.greaterThan(moment(saved.insertedOn).valueOf());
+      });
+
+      it('insert row after add', async function () {});
+      it('computed field', async function () {});
+    });

@@ -46,6 +46,7 @@ const datahub= {
                 result=await this.database.patch(dbName,collection,id,data);
             break;
             case "DELETE":
+                console.log("DELETE", id);
                 result=await this.database.remove(dbName,collection,id);
             break;
             default:
@@ -63,14 +64,14 @@ const datahub= {
 
 
             let collectionSettings= Object.assign(config.settings,config[collection]??{});
-            
 
             config.hooks.forEach((x)=>{
-                console.log("hooking "+x.eventName);
-                this.database.listen(x.eventName, async function(database,data){
-                    console.log("hooking "+x.name+" emitted");
-                    
-                    await x.function(database,data,user,config);
+                // console.log("hooking "+x.eventName);
+                //this.emitter.emit(eventName,this,db,collection,data);
+                this.database.listen(x.eventName, async function(database,db,collection, data){
+                    // console.log("hooking "+x.name+" emitted");
+                    //console.log(x);
+                    await x.function(database,db,collection,data,user,config);
                 });
             })
 
@@ -98,7 +99,6 @@ const datahub= {
             let aggregate=this.parseJSONArray(request.query.aggregate??'{}');//Object.assign(collectionSettings.aggregateBase ?? [],this.parseJSONArray(request.query.aggregate??'{}'), collectionSettings.aggregateOverride??[]);
             let result=await this.processRequest(dbName, collection,request.method,id, data,query,projection,aggregate);
 
-            
             return  result;
     }
 
