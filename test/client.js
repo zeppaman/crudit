@@ -80,7 +80,7 @@ simplifyResponse:   function(response){
       params:query
     };
 
-    if(method=='GET'){
+    if(method=='GET' || method=='DELETE' ){
       delete options.data;
     }
 

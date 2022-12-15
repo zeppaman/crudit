@@ -89,8 +89,22 @@ let database= {
         return saved;
     },
     remove: async function(db, collection, id){
-        this.emit(events.beforeDelete,saved);
-        let result=await (await this.dbFactory.getDb(db)).collection(collection).deleteOne(id);
+        this.emit(events.beforeDelete,id);
+        let _id=id;
+        if(typeof fruits == "object"){
+            if(id._id){
+                _id=id._id;
+            }else{
+                throw new Error("Onbject doesnt have an _id");
+            }
+        }
+
+        if(!_id){        
+            throw new Error("Unable to delete an entity without an ID");
+        }
+
+        this.emit(events.beforeDelete,id);
+        let result=await (await this.dbFactory.getDb(db)).collection(collection).deleteOne({ "_id" : _id });
         this.emit(events.afterDelete,db,collection,result);    
         return result;
     },

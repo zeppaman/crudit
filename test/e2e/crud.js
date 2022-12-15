@@ -155,11 +155,7 @@ let token="null";
 
       it('delete', async function () {
         let result=await client.remove(entity,saved._id);
-        saved=result.data;
-        console.log(saved);
-        expect(saved._id).to.not.be.null;
-        expect(saved._id).to.be.equal(saved._id);
-        expect(saved.field).to.be.equal("changed");
+        expect(result).to.be.equal(true);
       });
     });
   
