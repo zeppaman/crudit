@@ -124,7 +124,7 @@ let database= {
     },
     listen: function(eventName,func){
         this.emitter.on(eventName,(database,db,collection,data)=>{
-             func(database,db,collection,data).then(x=>console.log("done"));
+             func(database,db,collection,data).then(x=>{});
         });
     },
 };

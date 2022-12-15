@@ -26,7 +26,7 @@ crudy.config(function(config){
     //     data:data, user:user,db:db, collection:collection, config:config
     // });
     let username=user? user.name :'anonymous';
-    console.log("hook triggered");
+    //console.log("hook triggered");
     data.updatedOn=new Date();
     data.updatedBy=username;
 
@@ -104,6 +104,7 @@ return {
 
 
 app.all('/api/handler', async (request, response) => {
+    console.log("GOT");
     return await crudy.run(request,response);    
 })
 
