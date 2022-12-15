@@ -2,6 +2,7 @@ import {database, events, crudy}  from "../src/index.mjs";
 import express from  'express';
 import dotenv from  'dotenv';
 import crypto from  'crypto';
+import { resourceLimits } from "worker_threads";
 
 dotenv.config();
 
@@ -104,8 +105,9 @@ return {
 
 
 app.all('/api/handler', async (request, response) => {
-    console.log("GOT");
-    return await crudy.run(request,response);    
+    console.debug("GOT "+request.method+" - ", request.query);
+    let result= await crudy.run(request,response); 
+    return result;
 })
 
 
