@@ -143,12 +143,73 @@ let database= {
     },
 };
 
+const mutations ={
+    mutations:[],
+    database:database,
+    dbFactory:dbFactory,
+    init: async function(config){
+        let defaultMutations=[];
+        //TODO: add here basic mutation for creating the _mutation collection.
+        this.mutations=Object.assign(defaultMutations, config.mutations);
+    },
+    applyOne: async function(name){
+        /*
+            Rewrite:
+            1. iterate all the mutation got in mutations object
+            2. foreach one check if it have been run or not. If not run or run but in error, run it
+            3. if ok write the execution log in the _mutatoin collection
+            4. if in error write the log and stop.
 
+            when a mutation can be run?
+            - the database name match the regexp in teh mutation database name
+            - the mutation wasn't executed
+        */
+        return {
+            appliedCount:0,
+            exections:[{
+                name: "exec 1",
+                hasError:false,
+            },
+            {
+                name: "exec 2",
+                hasError:true,
+            }]
+        };
+        let mutation = this.mutations.find((m)=>{return m.name == name && !m.executed});
+        if(mutation){
+            try {
+                let config = this.currentConfig.settings.database;
+                if(mutation.dbName){
+                    config.name = mutation.dbName
+                }
+                let response = await mutation.function(config);
+                mutation.executed = true;
+                return({ hasError: false, data: response });
+            } catch (error) {
+                return({ hasError: true, error: error });
+            }
+        }else{
+            return({ hasError: true, error: "Mutation not found or already executed" });
+        }
+    },
+    applyAll: async function(){
+        let client=await this.dbFactory.getClient(); 
+        let databases=client
+        .db()
+        .admin()
+        .listDatabases();
+
+        databases.forEach((x)=>{
+            this.appyOne(x);
+        });
+    }
+};
 //module.exports=database;
 export default database;
 
 export {
     database,
     events,
-    dbFactory
+    dbFactory,
+    mutations
 };

@@ -31,65 +31,17 @@ const crudy= {
         };
         this.currentConfig.requests.push(request);
     },
-    mutations: function() {
-        let _this = this;
-        return({
-            add: function(name, dbName = false, mutationFn){
-                let mutation = {
-                    name: name,
-                    function: mutationFn,
-                    executed: false,
-                    dbName: dbName
-                }
-                if(_this.currentConfig.mutations.find((m)=>{return m.name == name})){
-                    this.remove(name);
-                }
-                _this.currentConfig.mutations.push(mutation);
-            },
-            remove: function(name){
-                _this.currentConfig.mutations =  _this.currentConfig.mutations.filter((m)=>{return m.name != name});
-                return({hasError: false})
-            },
-            appyOne: async function(name){
-                let mutation = _this.currentConfig.mutations.find((m)=>{return m.name == name && !m.executed});
-                if(mutation){
-                    try {
-                        let config = _this.currentConfig.settings.database;
-                        if(mutation.dbName){
-                            config.name = mutation.dbName
-                        }
-                        let response = await mutation.function(config);
-                        mutation.executed = true;
-                        return({ hasError: false, data: response });
-                    } catch (error) {
-                        return({ hasError: true, error: error });
-                    }
-                }else{
-                    return({ hasError: true, error: "Mutation not found or already executed" });
-                }
-            },
-            applyAll: async function(){
-                try {
-                    let mutationToExexute = _this.currentConfig.mutations.filter((m)=>{return !m.executed});
-                    if(mutationToExexute.length){
-                        let responses = [];
-                        for(let i = 0; i<mutationToExexute.length; i++){
-                            let config = _this.currentConfig.settings.database;
-                            if(mutationToExexute[i].dbName){
-                                config.name = mutationToExexute[i].dbName
-                            }
-                            responses.push(await mutationToExexute[i].function(config));
-                        }
-                        mutationToExexute.map((p)=>{p.executed = true});
-                        return({ hasError: false, data: responses });
-                    }else{
-                        return({ hasError: true, error: "No Mutation was registered and not executed" })
-                    }
-                } catch (error) {
-                    
-                }
-            }
-        });
+    mutation(name, dbName = false, mutationFn){
+        let mutation = {
+            name: name,
+            function: mutationFn,
+            executed: false,
+            dbName: dbName
+        }
+        if(this.currentConfig.mutations.find((m)=>{return m.name == name})){
+            this.remove(name);
+        }
+        this.currentConfig.mutations.push(mutation);
     },
     config:  function (func){
         func(this.currentConfig);
@@ -145,9 +97,7 @@ const crudy= {
     },
     
     run: async  function(request,response){
-
         let payload=await this.getResponse(request);
-
         return  await this.createResponse(response, {
             status:payload.status??200,
                 headers:{
@@ -156,13 +106,10 @@ const crudy= {
                 body:payload
             });
     },
-    getResponse: async  function(request){
-       
-      
-
+    getResponse: async  function(request){ 
         const start = Date.now()
         let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
-
+        
         try
         {
             if(!this.loaded) {

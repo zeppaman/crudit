@@ -1,8 +1,8 @@
-import {database, events, crudy}  from "../src/index.mjs";
+import {database, events, crudy,mutations}  from "../src/index.mjs";
 import express from  'express';
 import dotenv from  'dotenv';
 import crypto from  'crypto';
-import { resourceLimits } from "worker_threads";
+
 
 dotenv.config();
 
@@ -57,7 +57,6 @@ crudy.config(function(config){
 
 //Custom method for register
 crudy.request("register", "post",false,async function(request,loggedUser, settings){
-  
 
     let user=request.body;
     
@@ -103,41 +102,36 @@ return {
 });
 
 
-crudy.mutations().add('mutation1','mutationsDB', async (databaseConfig)=>{
-    await database.dbFactory.init(databaseConfig);
-    return(await database.insert(databaseConfig.name, 'test1', {success: true}))
+crudy.mutation('mutation1',false, async (databaseName)=>{
+    return(await database.insert(databaseName, 'testlist', {success: true}))
 });
 
-crudy.mutations().add('mutation2', false, async (databaseConfig)=>{
-    await database.dbFactory.init(databaseConfig);
-    return(await database.insert(databaseConfig.name, 'test2', {success: true}))
+crudy.mutation('mutation2', "database1", async (databaseName)=>{
+    return(await database.insert(databaseName, 'testlist', {success: true}))
 });
 
-crudy.mutations().add('mutation3', 'mutationsDB2', async (databaseConfig)=>{
-    await database.dbFactory.init(databaseConfig);
-    return(await database.insert(databaseConfig.name, 'test3', {success: true}))
+crudy.mutation('mutation3', false, async (databaseName)=>{
+    return(await database.insert(databaseName, 'testlist', {success: true}))
 });
 
+crudy.request("mutation", "post",false,async function(request,loggedUser, settings){
+    console.log("MUTATION");
+    if(!request.query.token==process.env.APP_MUTATION_PWD){
+        throw new Error("Unauthorized");
+    }
+    console.log("MUTATION - AUTHORIZED");
+    if(request.query.operation=="applyone"){
+        console.log("MUTATION - applyone");
+        return await mutations.applyOne(request.query.database);
+    }else if (request.query.operation=="apply"){
+        return await mutations.applyAll();
+    }
+    else
+    {
+        throw new Error("Unauthorized");
+    }
+});
 
-let responses = [];
-
-//apply first mutation
-responses.push(await crudy.mutations().appyOne('mutation1'));
-
-//remove second mutation
-responses.push(await crudy.mutations().remove('mutation2'));
-
-//apply third mutation because first is already applied and second is removed
-responses.push(await crudy.mutations().applyAll());
-
-
-//should not apply any of them, they are removed, already applied or inexistent
-responses.push(await crudy.mutations().appyOne('mutation2'));
-responses.push(await crudy.mutations().applyAll());
-responses.push(await crudy.mutations().appyOne('mutation3'));
-responses.push(await crudy.mutations().appyOne('mutationInexistent'));
-
-console.log(responses);
 
 
 app.all('/api/handler', async (request, response) => {
