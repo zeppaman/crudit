@@ -68,7 +68,8 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
             .trim()
             .replace(/[^a-z0-9 ]/g, '')
             .replace(/\s+/g, '-');
-    user.active=false;
+    console.log(user.db);
+    user.active=true;
     user= await database.insert("global","users",user); 
     
     return user;
@@ -102,16 +103,16 @@ return {
 });
 
 
-crudy.mutation('mutation1',false, async (databaseName)=>{
-    return(await database.insert(databaseName, 'testlist', {success: true}))
+crudy.mutation('mutation1',false, async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
 });
 
-crudy.mutation('mutation2', "database1", async (databaseName)=>{
-    return(await database.insert(databaseName, 'testlist', {success: true}))
+crudy.mutation('mutation2', "database1", async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
 });
 
-crudy.mutation('mutation3', false, async (databaseName)=>{
-    return(await database.insert(databaseName, 'testlist', {success: true}))
+crudy.mutation('mutation3', '(.*)', async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
 });
 
 crudy.request("mutation", "post",false,async function(request,loggedUser, settings){
@@ -123,8 +124,10 @@ crudy.request("mutation", "post",false,async function(request,loggedUser, settin
     if(request.query.operation=="applyone"){
         console.log("MUTATION - applyone");
         return await mutations.applyOne(request.query.database);
-    }else if (request.query.operation=="apply"){
+    }else if (request.query.operation=="applyall"){
         return await mutations.applyAll();
+    }else if (request.query.operation=="applysingle"){
+        return await mutations.applySingle(request.query.database,request.query.mutation);
     }
     else
     {
