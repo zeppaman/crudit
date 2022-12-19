@@ -3,12 +3,13 @@
 // const database =require( "crudit/src/database.mjs");
 import pkg from 'mongodb';
 const { MongoClient, ServerApiVersion,ObjectID} = pkg;
-import {database,events} from "./database.mjs";
+import {database,events, mutations} from "./database.mjs";
 
 
 const datahub= {
     name:'datahub',
     database: database,
+    mutations: mutations,
     authenticate:true,
     parseJSONArray: function(jsonStr){
         return JSON.parse( jsonStr, function( key, value ){
@@ -56,6 +57,7 @@ const datahub= {
     },
     init: async function(config){
         await (this.database.dbFactory.init(config.settings.database));
+        await this.mutations.init(config.mutations)
     },
     function: async function(request, user, config){
 

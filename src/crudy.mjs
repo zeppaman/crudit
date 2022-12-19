@@ -31,11 +31,10 @@ const crudy= {
         };
         this.currentConfig.requests.push(request);
     },
-    mutation(name, dbName = false, mutationFn){
+    mutation(name, dbName, mutationFn){
         let mutation = {
             name: name,
             function: mutationFn,
-            executed: false,
             dbName: dbName
         }
         if(this.currentConfig.mutations.find((m)=>{return m.name == name})){

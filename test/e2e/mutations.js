@@ -25,6 +25,8 @@ const password=dbtest;
 
 let token="null";
 
+console.log(dbtest);
+
  
 
 
@@ -66,6 +68,7 @@ describe('mutations', async function () {
         let response=await client.apiCall(baseUrl,"GET",null,{action:'mutation', operation:"applyone", database:"c_"+username});
         //console.log(response.data);
         let result=response.data.data;
+        console.log(response.data);
         expect(result.appliedCount).to.be.equal(2); //exact number of muatation that matches the database
         expect(response.hasError).to.be.true();
 
