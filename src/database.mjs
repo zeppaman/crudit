@@ -1,5 +1,7 @@
 //const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
 import pkg from 'mongodb';
+import defaultConfig from  './default.mjs';
+
 const { MongoClient, ServerApiVersion,} = pkg;
 
 import {EventEmitter} from 'events'
@@ -157,10 +159,10 @@ const mutations ={
     init: async function(mutations){
         let defaultMutations=[];
         //TODO: add here basic mutation for creating the _mutation collection.
-        this.mutations=[...defaultMutations, ...mutations];
+        this.mutations=[...defaultMutations, ...mutations, ...defaultConfig.mutations];
     },
     applySingle: async function(databaseName,mutationName){
-        console.log("applySingle",databaseName,mutationName);
+        let mutation = this.mutations.find((m)=>{return m.name == mutationName});
         if(!databaseName || databaseName==databaseName || databaseName.match(new Regex(databaseName))) {
             let dbmutation=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
             if(!dbmutation || dbmutation.length==0){
@@ -169,26 +171,29 @@ const mutations ={
                     firstExecution: new Date()
                 };
             }
-            dbmutation.lastExecution=new Date();
-            if(!dbmutation || dbmutation.length==0 || dbmutation.hasError==true){
+            dbmutation = Object.assign(dbmutation, mutation);
+            if(!dbmutation || dbmutation.length==0 || dbmutation.hasError==true || !dbmutation.lastExecution){
                 //no mutation on database, try to execute
                 try
                 {
-                    let result=await mutation.function(mutation,dbmutation)
+                    let result=await dbmutation.function(databaseName,dbmutation)
                     dbmutation= Object.assign(dbmutation, result);
+                    dbmutation.lastExecution=new Date();
+                    dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
+                    console.log('just executed:', dbmutation, result);
+                    return dbmutation
                     
                 }catch(err){
                     dbmutation= Object.assign(dbmutation, {hasError:true, 
                         errorMessage: err.message,
                     });
+                    dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
+                    console.log('Went trouble', dbmutation, err);
+                    return dbmutation
                 }
-
-                //write on database                
-                dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", dbmutation);
-               
             }
-            return dbmutation
         }
+        console.log('SKIPEPD')
         return {
             name: mutationName,
             hasError:false,
@@ -196,33 +201,11 @@ const mutations ={
         };
     },
     applyOne: async function(databaseName,continueOnError=false){
-
-        /*
-            Rewrite:
-            1. iterate all the mutation got in mutations object
-            2. foreach one check if it have been run or not. If not run or run but in error, run it
-            3. if ok write the execution log in the _mutatoin collection
-            4. if in error write the log and stop.
-
-            when a mutation can be run?
-            - the database name match the regexp in teh mutation database name
-            - the mutation wasn't executed
-        */
-
-        console.log("mutation apply",this.mutations);
         let result=[];
         this.mutations.forEach(async (mutation)=>{
                 let dbmutation= await this.applySingle(databaseName,mutation.name);
-                //console.log(dbmutation);
                 result.push(dbmutation);
-                //console.log(result);
-                //exit if not continueOnError
-                // if(!continueOnError && dbmutation.hasError){
-                //     return result;
-                // }
-
             }, this);
-        console.log(result);
         return result;
     },
     applyAll: async function(){

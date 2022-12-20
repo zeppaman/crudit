@@ -23,9 +23,9 @@ crudy.config(function(config){
   });
 
   crudy.hook('audit',events.beforeSave,null,null,async function(database,db,collection,data,user,config){
-    // console.log({
-    //     data:data, user:user,db:db, collection:collection, config:config
-    // });
+    console.log({
+         data:data, user:user,db:db, collection:collection, config:config
+    });
     let username=user? user.name :'anonymous';
     //console.log("hook triggered");
     data.updatedOn=new Date();
@@ -116,7 +116,6 @@ crudy.mutation('mutation3', '(.*)', async (databaseName,prevExec)=>{
 });
 
 crudy.request("mutation", "post",false,async function(request,loggedUser, settings){
-    console.log("MUTATION");
     if(!request.query.token==process.env.APP_MUTATION_PWD){
         throw new Error("Unauthorized");
     }

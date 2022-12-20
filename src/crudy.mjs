@@ -40,6 +40,8 @@ const crudy= {
         if(this.currentConfig.mutations.find((m)=>{return m.name == name})){
             this.remove(name);
         }
+
+        //we need this mutations as if they where in the db+
         this.currentConfig.mutations.push(mutation);
     },
     config:  function (func){

@@ -8,7 +8,6 @@ chai.use(chaiJsonPattern.default);
 
 
 
-/*
 const baseUrl="http://localhost:3000/api/handler?prova=prova";
 
 const date=new Date();
@@ -189,4 +188,3 @@ let token="null";
       it('insert row after add', async function () {});
       it('computed field', async function () {});
     });
-*/
