@@ -47,7 +47,6 @@ const datahub= {
                 result=await this.database.patch(dbName,collection,id,data);
             break;
             case "DELETE":
-                console.log("DELETE", id);
                 result=await this.database.remove(dbName,collection,id);
             break;
             default:

@@ -12,7 +12,6 @@ chai.use(chaiJsonPattern.default);
 
 
 async function truncate(collection){
-    console.log("TRUNCATING", collection);
     let list=await client.search(collection,{},{});
     list.data.forEach(element => {
         client.remove(element);
@@ -24,11 +23,6 @@ const password=dbtest;
 
 
 let token="null";
-
-console.log(dbtest);
-
- 
-
 
     describe('login', async function () {
         it('add temporary user', async function () {
@@ -68,9 +62,9 @@ describe('mutations', async function () {
         let response=await client.apiCall(baseUrl,"GET",null,{action:'mutation', operation:"applyone", database:"c_"+username});
         //console.log(response.data);
         let result=response.data.data;
-        console.log('data first run 3333333333');
+        console.log('data first run', result, response);
         expect(result.appliedCount).to.be.equal(2); //exact number of muatation that matches the database
-        expect(response.hasError).to.be.true();
+        expect(response.data.hasError).to.be.true();
 
     });
 
@@ -78,10 +72,10 @@ describe('mutations', async function () {
         //apply mutations again. No changes expected.
         let response=await client.apiCall(baseUrl,"GET",null,{action:'mutation', operation:"applyone", database:"c_"+username});
         //console.log(response.data);
-        console.log('data seeeeen');
         let result=response.data.data;
+        console.log('data second run', result, response);
         expect(result.appliedCount).to.be.equal(0);
-        expect(response.hasError).to.be.true();
+        expect(response.data.hasError).to.be.true();
 
     });
     

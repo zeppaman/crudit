@@ -163,8 +163,8 @@ const mutations ={
     },
     applySingle: async function(databaseName,mutationName){
         let mutation = this.mutations.find((m)=>{return m.name == mutationName});
-        if(!databaseName || databaseName==databaseName || databaseName.match(new Regex(databaseName))) {
-            let dbmutation=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
+        let dbmutation=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
+        if(!databaseName || mutation.dbName==databaseName || databaseName.match(new RegExp(mutation.dbName))) {
             if(!dbmutation || dbmutation.length==0){
                 dbmutation={
                     name: mutationName,
@@ -176,36 +176,36 @@ const mutations ={
                 //no mutation on database, try to execute
                 try
                 {
-                    let result=await dbmutation.function(databaseName,dbmutation)
+                    let result = await dbmutation.function(databaseName,dbmutation);
                     dbmutation= Object.assign(dbmutation, result);
                     dbmutation.lastExecution=new Date();
-                    dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
-                    console.log('just executed:', dbmutation, result);
-                    return dbmutation
                     
                 }catch(err){
                     dbmutation= Object.assign(dbmutation, {hasError:true, 
                         errorMessage: err.message,
                     });
-                    dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
-                    console.log('Went trouble', dbmutation, err);
-                    return dbmutation
                 }
+                
+                dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
+                return dbmutation;
             }
         }
-        console.log('SKIPEPD')
         return {
             name: mutationName,
-            hasError:false,
+            hasError:true,
             message: "skipped"
         };
     },
     applyOne: async function(databaseName,continueOnError=false){
         let result=[];
-        this.mutations.forEach(async (mutation)=>{
-                let dbmutation= await this.applySingle(databaseName,mutation.name);
-                result.push(dbmutation);
-            }, this);
+        for(let mutation of this.mutations){
+            let dbmutation = await this.applySingle(databaseName,mutation.name);
+            result.push(dbmutation);
+        }
+        result = {
+            appliedCount: result.filter((mut)=>{return(!mut.hasError)}).length,
+            data: result
+        }
         return result;
     },
     applyAll: async function(){

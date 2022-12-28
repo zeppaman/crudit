@@ -9,8 +9,6 @@ dotenv.config();
 const app = express()
 const port = 3000
 
-console.log("started");
-
 app.use(express.json());
 
 
@@ -23,9 +21,6 @@ crudy.config(function(config){
   });
 
   crudy.hook('audit',events.beforeSave,null,null,async function(database,db,collection,data,user,config){
-    console.log({
-         data:data, user:user,db:db, collection:collection, config:config
-    });
     let username=user? user.name :'anonymous';
     //console.log("hook triggered");
     data.updatedOn=new Date();
@@ -41,7 +36,6 @@ crudy.config(function(config){
   
   //Custom method for login
   crudy.request("login", "post",false,async function(request,loggedUser, settings){
-    console.log(request.body);
     let hash= crypto.createHash('md5').update(request.body.password).digest('hex');
     let user= await database.search("global","users",{username:request.body.username, password:hash});
     if(!user || user.length!=1) throw new Error("Wrong username and password");
@@ -68,7 +62,6 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
             .trim()
             .replace(/[^a-z0-9 ]/g, '')
             .replace(/\s+/g, '-');
-    console.log(user.db);
     user.active=true;
     user= await database.insert("global","users",user); 
     

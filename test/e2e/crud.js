@@ -37,7 +37,6 @@ let token="null";
                 username: username,
                 password:password
             },{action:'login'});
-            console.log(response.data);
             let token=response.data.data.token;
             instance.defaults.headers.common['Authorization']=token;
         });
