@@ -139,6 +139,7 @@ const crudy= {
 
             payload.data=result;          
 
+            payload.hasError = result.hasError || false;
            
             const stop = Date.now();
             payload.echo.duration=stop-start;

@@ -164,6 +164,7 @@ const mutations ={
     applySingle: async function(databaseName,mutationName){
         let mutation = this.mutations.find((m)=>{return m.name == mutationName});
         let dbmutation=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
+        console.log('dbMutation first from db', dbmutation)
         if(!databaseName || mutation.dbName==databaseName || databaseName.match(new RegExp(mutation.dbName))) {
             if(!dbmutation || dbmutation.length==0){
                 dbmutation={
@@ -187,6 +188,9 @@ const mutations ={
                 }
                 
                 dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
+
+                let testone=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
+                console.log('testone', testone);
                 return dbmutation;
             }
         }
@@ -204,6 +208,7 @@ const mutations ={
         }
         result = {
             appliedCount: result.filter((mut)=>{return(!mut.hasError)}).length,
+            hasError: result.some((mut)=>{return mut.hasError}),
             data: result
         }
         return result;
