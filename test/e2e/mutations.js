@@ -62,7 +62,6 @@ describe('mutations', async function () {
         let response=await client.apiCall(baseUrl,"GET",null,{action:'mutation', operation:"applyone", database:"c_"+username});
         //console.log(response.data);
         let result=response.data.data;
-        console.log('data first run', result, response);
         expect(result.appliedCount).to.be.equal(2); //exact number of muatation that matches the database
         expect(response.data.hasError).to.be.true;
     });
@@ -72,7 +71,6 @@ describe('mutations', async function () {
         let response=await client.apiCall(baseUrl,"GET",null,{action:'mutation', operation:"applyone", database:"c_"+username});
         //console.log(response.data);
         let result=response.data.data;
-        console.log('data second run', result, username);
         expect(result.appliedCount).to.be.equal(0);
         expect(response.data.hasError).to.be.true;
     });
