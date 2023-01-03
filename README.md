@@ -143,6 +143,50 @@ See the example below that adds audit to the entity saved:
 
 The list of event that you can
 
+## Mutation Feature
+Crudit has a mutation feature, that can manipulate the data in the databases. Can be used for creating calculated fields, or to execute bulk operation in the databases.
+
+When registering a mutation, you need to provide the mutation name, an optional database filter, and mutation function, that expect a database name as argoment.
+
+After registered, a mutation can be trigged in 3 ways:
+- With 'applySingle', providing as argoments the mutation name and the database name to be executed on
+- With 'applyOne', providing the mutation name, and it will be executed in all the database that match the database filter provided in the registration.
+- With 'applyAll', that will execute all the mutation an all the databases every mutation definition meet. 
+
+### Example code snippets:
+
+#### Registering some mutations
+import {database, events, crudy,mutations}  from "../src/index.mjs";
+
+// mutation1 will add to all the databases the collection testlist with the following object
+// false, as database filter, will execute the mutation on all the databases
+crudy.mutation('mutation1',false, async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
+});
+
+//mutation2 will do the same operation, but only on the database named "database1".
+//you can use the name of a specific database to execute the mutation on
+crudy.mutation('mutation2', "database1", async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
+});
+
+//mutation3 will do the same operation, on all the database
+//you can use a Regural Expression to describe which database will be effected by the mutation, referring on the database name
+crudy.mutation('mutation3', '(.*)', async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
+});
+
+#### Applying the mutations
+
+//apply only mutation2 on only database1
+mutations.applySingle( 'database1', 'mutation2');
+
+//apply mutations1 on all databases that meet the mutation1 database filter.
+mutations.applyOne('mutation1');
+
+//apply all the registered mutations on all the databases that each mutation filter meet.
+mutations.applyAll();
+
 # Installation
 Crudit works at low level so it is compatible with most system. In the next examples we provide the condifuration for bare express installation and vercel serverless function.
 
