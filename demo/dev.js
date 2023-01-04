@@ -16,7 +16,7 @@ app.use(express.json());
 // configure settings
 crudy.config(function(config){
     config.settings.database.name='test';
-    config.settings.database.roles=['owner']; //SHOULD BE inside database!
+    config.settings.database.roles=['owner']; 
     config.settings.database.url=process.env.CRUDIT_DBURL;
   });
 
