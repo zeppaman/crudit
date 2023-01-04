@@ -10,6 +10,7 @@ Serverless and low code plaform
   * [Endpoints](#endpoints)
   * [Data Validation](#data-validation)
   * [Hook Systems](#hook-systems)
+  * [Mutations](#mutations)
 - [Installation](#installation)
   * [On Express](#on-express)
   * [On Vercel Serverless Function](#on-vercel-serverless-function)
@@ -35,7 +36,7 @@ The project is work in progress but you can:
 - [x] Hook system
 - [ ] Computed fields and data augmentation
 - [ ] Data validation
-- [ ] Audit
+- [x] Audit
 
 ## Configure settings
 
@@ -46,6 +47,7 @@ The `config` method give you the whole computed configuration and let you read a
 crudy.config(function(config){
     config.settings.database='test';
     config.settings.roles=['owner'];
+    config.settings.database.url=process.env.CRUDIT_DBURL;
   });
 ``` 
 
@@ -118,15 +120,32 @@ The hook system allow to alter data or queries writing custom code snippet.
 To add an hook, just use the `hook` method passing the name of the event to be linstened and the function that you want to run. Based on the event type you can hava an item or a list of items as argument.
 
 ```js
-crudy.hook('MyHookInvokation','eventName', function);
+crudy.hook('MyHookInvokation',
+            'eventName',
+            'database name or null for any',
+            'collection name or null for any', 
+            function);
 ```
 The list of the eventNames can be found using `event` constant from `import {events} from 'crudy/database'`.
+
+The funtion as the follwing prototype:
+
+```js
+function(database,db,collection,data,user,config){
+  //database, object to access database
+  //db, name of database of the data that triggered this event
+  //collection,  name of collection of the data that triggered this event
+  //data, item that has triggered the event 
+  //user, user that made the operation on data
+  //config, the settings
+}
+```
 
 
 See the example below that adds audit to the entity saved:
 
 ```js
- crudy.hook('audit',events.afterSave,async function(database,data, user, config){
+ crudy.hook('audit',events.afterSave,false, false, async function(database,data, user, config){
     let username=user? user.name :'anonymous';
     console.log("hook triggered");
     data.updatedOn=new Date();
@@ -141,7 +160,54 @@ See the example below that adds audit to the entity saved:
   });
 ```
 
-The list of event that you can
+The list of event that you can invoke is available in the `events` class.
+
+## Mutations
+Crudit has a mutation feature, that can manipulate the data in the databases. Can be used for creating calculated fields, or to execute bulk operation in the databases.
+
+When registering a mutation, you need to provide the mutation name, an optional database filter, and mutation function, that expect a database name as argoment.
+
+After registered, a mutation can be trigged in 3 ways:
+- With 'applySingle', providing as argoments the mutation name and the database name to be executed on
+- With 'applyOne', providing the mutation name, and it will be executed in all the database that match the database filter provided in the registration.
+- With 'applyAll', that will execute all the mutation an all the databases every mutation definition meet. 
+
+### Example code snippets:
+
+#### Registering some mutations
+```js
+import {database, events, crudy,mutations}  from "../src/index.mjs";
+
+// mutation1 will add to all the databases the collection testlist with the following object
+// false, as database filter, will execute the mutation on all the databases
+crudy.mutation('mutation1',false, async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
+});
+
+//mutation2 will do the same operation, but only on the database named "database1".
+//you can use the name of a specific database to execute the mutation on
+crudy.mutation('mutation2', "database1", async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
+});
+
+//mutation3 will do the same operation, on all the database
+//you can use a Regural Expression to describe which database will be effected by the mutation, referring on the database name
+crudy.mutation('mutation3', '(.*)', async (databaseName,prevExec)=>{
+    return(await database.insert(databaseName, 'testlist', {hasError: false}))
+});
+```
+
+#### Applying the mutations
+```js
+//apply only mutation2 on only database1
+mutations.applySingle( 'database1', 'mutation2');
+
+//apply mutations1 on all databases that meet the mutation1 database filter.
+mutations.applyOne('mutation1');
+
+//apply all the registered mutations on all the databases that each mutation filter meet.
+mutations.applyAll();
+```
 
 # Installation
 Crudit works at low level so it is compatible with most system. In the next examples we provide the condifuration for bare express installation and vercel serverless function.

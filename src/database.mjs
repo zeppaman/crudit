@@ -1,5 +1,7 @@
 //const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
 import pkg from 'mongodb';
+import defaultConfig from  './default.mjs';
+
 const { MongoClient, ServerApiVersion,} = pkg;
 
 import {EventEmitter} from 'events'
@@ -56,6 +58,13 @@ let database= {
         let result=await  (await this.dbFactory.getDb(db)).collection(collection).findOne(id);
         this.emit(events.alterItem,db,collection,result);  
         return result;
+    },
+    insertOrUpdate:async function (db, collection, data){
+        if(data._id && data.id!=""){
+            return await this.replace(db,collection,data);
+        } else{
+            return await this.insert(db, collection, data);
+        }
     },
     insert:async function (db, collection, data){
         this.emit(events.beforeSave,db,collection,data);
@@ -143,12 +152,86 @@ let database= {
     },
 };
 
+const mutations ={
+    mutations:[],
+    database:database,
+    dbFactory:dbFactory,
+    init: async function(mutations){
+        let defaultMutations=[];
+        //TODO: add here basic mutation for creating the _mutation collection.
+        this.mutations=[...defaultMutations, ...mutations, ...defaultConfig.mutations];
+    },
+    applySingle: async function(databaseName,mutationName){
+        let mutation = this.mutations.find((m)=>{return m.name == mutationName});
+        let dbmutation=await this.database.search(databaseName,"_mutations",{'dbmutation.name':mutationName},{});
+        if(dbmutation.length > 0){
+            dbmutation = dbmutation[0].dbmutation;
+        }
+        if(!mutation.dbName || mutation.dbName==databaseName || databaseName.match(new RegExp(mutation.dbName))) {
+            if(!dbmutation || dbmutation.length==0){
+                dbmutation={
+                    name: mutationName,
+                    firstExecution: new Date()
+                };
+            }
+            dbmutation = Object.assign(dbmutation, mutation);
+            if(!dbmutation || dbmutation.length==0 || dbmutation.hasError==true || !dbmutation.lastExecution){
+                //no mutation on database, try to execute
+                try
+                {
+                    let result = await dbmutation.function(databaseName,dbmutation);
+                    dbmutation= Object.assign(dbmutation, result);
+                    dbmutation.lastExecution=new Date();
+                    
+                }catch(err){
+                    dbmutation= Object.assign(dbmutation, {hasError:true, 
+                        errorMessage: err.message,
+                    });
+                }
+                
+                dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
 
+                let testone=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
+                return dbmutation;
+            }
+        }
+        return {
+            name: mutationName,
+            hasError:true,
+            message: "skipped"
+        };
+    },
+    applyOne: async function(databaseName,continueOnError=false){
+        let result=[];
+        for(let mutation of this.mutations){
+            let dbmutation = await this.applySingle(databaseName,mutation.name);
+            result.push(dbmutation);
+        }
+        result = {
+            appliedCount: result.filter((mut)=>{return(!mut.hasError)}).length,
+            hasError: result.some((mut)=>{return mut.hasError}),
+            data: result
+        }
+        return result;
+    },
+    applyAll: async function(){
+        let client=await this.dbFactory.getClient(); 
+        let databases=client
+        .db()
+        .admin()
+        .listDatabases();
+
+        databases.forEach((x)=>{
+            this.appyOne(x);
+        });
+    }
+};
 //module.exports=database;
 export default database;
 
 export {
     database,
     events,
-    dbFactory
+    dbFactory,
+    mutations
 };

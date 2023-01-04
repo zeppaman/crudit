@@ -15,6 +15,7 @@ const settings={
     },
     requests:[datahub],
     hooks:[],    
+    mutations: []
     // plugins: [{
     //     name: "dbFactory",
     //     init: async function(config){

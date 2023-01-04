@@ -8,7 +8,6 @@ chai.use(chaiJsonPattern.default);
 
 
 
-
 const baseUrl="http://localhost:3000/api/handler?prova=prova";
 
 const date=new Date();
@@ -38,7 +37,6 @@ let token="null";
                 username: username,
                 password:password
             },{action:'login'});
-            console.log(response.data);
             let token=response.data.data.token;
             instance.defaults.headers.common['Authorization']=token;
         });

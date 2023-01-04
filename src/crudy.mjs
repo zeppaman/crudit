@@ -31,6 +31,19 @@ const crudy= {
         };
         this.currentConfig.requests.push(request);
     },
+    mutation(name, dbName, mutationFn){
+        let mutation = {
+            name: name,
+            function: mutationFn,
+            dbName: dbName
+        }
+        if(this.currentConfig.mutations.find((m)=>{return m.name == name})){
+            this.remove(name);
+        }
+
+        //we need this mutations as if they where in the db+
+        this.currentConfig.mutations.push(mutation);
+    },
     config:  function (func){
         func(this.currentConfig);
     },
@@ -85,9 +98,7 @@ const crudy= {
     },
     
     run: async  function(request,response){
-
         let payload=await this.getResponse(request);
-
         return  await this.createResponse(response, {
             status:payload.status??200,
                 headers:{
@@ -96,13 +107,10 @@ const crudy= {
                 body:payload
             });
     },
-    getResponse: async  function(request){
-       
-      
-
+    getResponse: async  function(request){ 
         const start = Date.now()
         let payload={hasError:false, echo:{duration:0}, error:"", data:{},status:200};
-
+        
         try
         {
             if(!this.loaded) {
@@ -131,6 +139,7 @@ const crudy= {
 
             payload.data=result;          
 
+            payload.hasError = result.hasError || false;
            
             const stop = Date.now();
             payload.echo.duration=stop-start;
