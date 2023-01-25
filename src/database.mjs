@@ -5,6 +5,10 @@ import defaultConfig from  './default.mjs';
 const { MongoClient, ServerApiVersion,} = pkg;
 
 import {EventEmitter} from 'events'
+// add this handler before emitting any events
+process.on('uncaughtException', function (err) {
+    console.log('UNCAUGHT EXCEPTION - keeping process alive:', err);
+});
 
 const  dbFactory= {
     client: null,

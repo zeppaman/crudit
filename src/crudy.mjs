@@ -1,5 +1,6 @@
 import defaultConfig from  './default.mjs';
-import {dbFactory} from './database.mjs';
+import {dbFactory, events} from './database.mjs';
+import Validator from 'validatorjs';
 
 
 let defaultHeaders={"Content-Type": "application/json"};
@@ -21,7 +22,7 @@ const crudy= {
 
         this.currentConfig.hooks.push(hook);
     },
-    request:  function (name, method,authenticate,func, init=null){
+    request:  function (name, method,authenticate,func, init=()=>{}){
         let request={
             name: name,
             method:method,
@@ -52,6 +53,15 @@ const crudy= {
     },
     configEntity:   function (entity, config){
         this.currentConfig[entity]=config;
+        console.log(this.currentConfig);
+        if(entity == 'validation'){
+            this.hook('validation', events.beforeSave,null,null,(database,db,collection,data,user,config)=>{
+                const validation = new Validator(data, config.validation);
+                if(validation.fails()){
+                    throw 'data validation fails'
+                }
+            })
+        }
     },
     createResponse:  function(response, data){
         let headers=Object.assign(defaultHeaders,data.headers);

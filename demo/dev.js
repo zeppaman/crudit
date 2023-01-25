@@ -68,6 +68,11 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
     return user;
 });
 
+crudy.request("test_validazione", "post",false,async function(request,loggedUser, settings){}, {
+    'age': 'required|min:18',
+    'email': 'required|email'
+});
+
 crudy.authorize(async function(request){
 let token=request.headers.authorization ?? request.query.authorization;
 
@@ -95,6 +100,10 @@ return {
 
 });
 
+crudy.configEntity('validation', {
+    'age': 'required|min:18',
+    'email': 'required|email'
+});
 
 crudy.mutation('mutation1',false, async (databaseName,prevExec)=>{
     return(await database.insert(databaseName, 'testlist', {hasError: false}))
@@ -130,7 +139,6 @@ crudy.request("mutation", "post",false,async function(request,loggedUser, settin
 
 
 app.all('/api/handler', async (request, response) => {
-    console.debug("GOT "+request.method+" - ", request.query);
     let result= await crudy.run(request,response); 
     return result;
 })
