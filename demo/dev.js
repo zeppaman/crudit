@@ -69,10 +69,15 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
     return user;
 });
 
-crudy.request("test_validazione", "post",false,async function(request,loggedUser, settings){}, {
-    'age': 'required|min:18',
-    'email': 'required|email'
-});
+crudy.configEntity('testValidation', {
+    db: 'testValidationDb',
+    collection: 'testCollection',
+    validation: {
+        name: 'required',
+        age: 'min:18|required',
+        email: 'email|required'
+    }
+})
 
 crudy.authorize(async function(request){
 let token=request.headers.authorization ?? request.query.authorization;

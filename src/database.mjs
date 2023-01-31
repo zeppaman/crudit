@@ -1,5 +1,6 @@
 //const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
 import pkg from 'mongodb';
+import Validator from 'validatorjs';
 import defaultConfig from  './default.mjs';
 
 const { MongoClient, ServerApiVersion,} = pkg;
@@ -220,7 +221,6 @@ const mutations ={
                 
                 dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
 
-                let testone=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
                 return dbmutation;
             }
         }
@@ -255,6 +255,46 @@ const mutations ={
         });
     }
 };
+
+const validations = {
+    validations: [],
+    database:database,
+    dbFactory:dbFactory,
+    emitter: new EventEmitter(),
+    registerValidation: function(config){
+        if(config.validation && config.collection && config.database){
+            this.validateOne(config.database, config.collection, config.validation);
+        }else if(config.collection && config.validation){
+            this.validateCollectionInAllDatabase(config.collection, config.validation);
+        }else if(config.database && config.validation){
+            this.validateOneDatabase(config.database, config.validation);
+        }else if(config.validation){
+            this.validate(undefined, undefined, config.validation);
+        }
+    },
+    validate: function(dbToValidate, collectionToValidate, validationRules){
+        this.emitter.on(events.beforeSave, (database,db,collection,data)=>{
+            let validation = new Validator(data, validationRules);
+            if( !( (dbToValidate == db || !dbToValidate) && (collectionToValidate == collection || !collection) && validation.passes() ) ){
+                throw {error: 'Invalid data', data: validation.errors }
+            }
+        });
+    },
+    validateOneDatabase: function(dbToValidate, validationRules){
+        this.validate(dbToValidate, undefined, validationRules);
+    },
+    validateCollectionInAllDatabase: function(collectionToValidate, validationRules){
+        let client = await this.dbFactory.getClient()
+        let databases=client
+        .db()
+        .admin()
+        .listDatabases();
+
+        databases.forEach((x)=>{
+            this.validate(x. collectionToValidate, validationRules);
+        });
+    }
+}
 //module.exports=database;
 export default database;
 
@@ -262,5 +302,6 @@ export {
     database,
     events,
     dbFactory,
-    mutations
+    mutations,
+    validations
 };
