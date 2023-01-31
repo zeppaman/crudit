@@ -47,12 +47,7 @@ class EventEmitter{
         if(this._events.hasOwnProperty(name)){    
             this._events[name].forEach(func => {
                 console.log("content:"+func);
-                try{
                     func( database,db,collection,data);
-                }catch(error){
-                    console.error(error);
-                }
-
             });
         }
     }
