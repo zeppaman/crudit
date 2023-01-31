@@ -4,11 +4,13 @@ import defaultConfig from  './default.mjs';
 
 const { MongoClient, ServerApiVersion,} = pkg;
 
-import {EventEmitter} from 'events'
+
 // add this handler before emitting any events
-process.on('uncaughtException', function (err) {
-    console.log('UNCAUGHT EXCEPTION - keeping process alive:', err);
-});
+//TODO: you shouldn't need it
+//process.on('uncaughtException', function (err) {
+//    console.log('UNCAUGHT EXCEPTION - keeping process alive:', err);
+//});
+
 
 const  dbFactory= {
     client: null,
@@ -40,6 +42,29 @@ const  dbFactory= {
     }
 
 };
+
+class EventEmitter{
+    constructor() {
+        this._events={};
+
+    }
+
+    emit(name,database,db,collection,data){
+        if(this._events.hasOwnProperty(name)){    
+            this._events[name].forEach(func => {
+                console.log("content:"+func);
+                    func( database,db,collection,data);
+            });
+        }
+    }
+
+    on(name,func){
+        if(!this._events.hasOwnProperty(name)){
+            this._events[name]=[];
+        }
+        this._events[name].push(func);
+    }
+}
 
 let events={
     alterQuery:"db.alterquery",
