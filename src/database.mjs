@@ -4,7 +4,7 @@ import defaultConfig from  './default.mjs';
 
 const { MongoClient, ServerApiVersion,} = pkg;
 
-import {EventEmitter} from 'events'
+//import {EventEmitter} from 'events'
 
 const  dbFactory= {
     client: null,
@@ -36,6 +36,34 @@ const  dbFactory= {
     }
 
 };
+
+class EventEmitter{
+    constructor() {
+        this._events={};
+
+    }
+
+    emit(name,database,db,collection,data){
+        if(this._events.hasOwnProperty(name)){    
+            this._events[name].forEach(func => {
+                console.log("content:"+func);
+                try{
+                    func( database,db,collection,data);
+                }catch(error){
+                    console.error(error);
+                }
+
+            });
+        }
+    }
+
+    on(name,func){
+        if(!this._events.hasOwnProperty(name)){
+            this._events[name]=[];
+        }
+        this._events[name].push(func);
+    }
+}
 
 let events={
     alterQuery:"db.alterquery",

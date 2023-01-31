@@ -70,9 +70,9 @@ const datahub= {
                 // console.log("hooking "+x.eventName);
                 //this.emitter.emit(eventName,this,db,collection,data);
                 this.database.listen(x.eventName, async function(database,db,collection, data){
-                    // console.log("hooking "+x.name+" emitted");
-                    //console.log(x);
-                    await x.function(database,db,collection,data,user,config);
+                     //console.log("hooking "+x.name+" emitted");
+                    // console.log(null,db,collection, data);
+                     await x.function(database,db,collection,data,user,config);
                 });
             })
 

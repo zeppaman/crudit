@@ -21,6 +21,8 @@ crudy.config(function(config){
   });
 
   crudy.hook('audit',events.beforeSave,null,null,async function(database,db,collection,data,user,config){
+   // console.log("AUDIT");
+    //console.log(null,db,collection,data,user,config);
     let username=user? user.name :'anonymous';
     //console.log("hook triggered");
     data.updatedOn=new Date();
@@ -34,7 +36,6 @@ crudy.config(function(config){
   });
 
   
-  //Custom method for login
   crudy.request("login", "post",false,async function(request,loggedUser, settings){
     let hash= crypto.createHash('md5').update(request.body.password).digest('hex');
     let user= await database.search("global","users",{username:request.body.username, password:hash});
