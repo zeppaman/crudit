@@ -53,8 +53,7 @@ class EventEmitter{
     emit(name,database,db,collection,data){
         if(this._events.hasOwnProperty(name)){    
             this._events[name].forEach(func => {
-                console.log("content:"+func);
-                    func( database,db,collection,data);
+                func( database,db,collection,data);
             });
         }
     }
@@ -261,13 +260,13 @@ const validations = {
     database:database,
     dbFactory:dbFactory,
     emitter: new EventEmitter(),
-    registerValidation: function(config){
+    registerValidation: async function(config){
         if(config.validation && config.collection && config.database){
-            this.validateOne(config.database, config.collection, config.validation);
+            await this.validateOne(config.database, config.collection, config.validation);
         }else if(config.collection && config.validation){
-            this.validateCollectionInAllDatabase(config.collection, config.validation);
+            await this.validateCollectionInAllDatabase(config.collection, config.validation);
         }else if(config.database && config.validation){
-            this.validateOneDatabase(config.database, config.validation);
+            await this.validateOneDatabase(config.database, config.validation);
         }else if(config.validation){
             this.validate(undefined, undefined, config.validation);
         }
@@ -283,7 +282,7 @@ const validations = {
     validateOneDatabase: function(dbToValidate, validationRules){
         this.validate(dbToValidate, undefined, validationRules);
     },
-    validateCollectionInAllDatabase: function(collectionToValidate, validationRules){
+    validateCollectionInAllDatabase: async function(collectionToValidate, validationRules){
         let client = await this.dbFactory.getClient()
         let databases=client
         .db()
