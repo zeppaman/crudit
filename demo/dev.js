@@ -107,8 +107,11 @@ return {
 });
 
 crudy.configEntity('validation', {
-    'age': 'required|min:18',
-    'email': 'required|email'
+    collection: 'testCollection',
+    validation: {
+        'age': 'required|min:18',
+        'email': 'required|email'
+    }
 });
 
 crudy.mutation('mutation1',false, async (databaseName,prevExec)=>{

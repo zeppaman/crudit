@@ -1,5 +1,5 @@
 import defaultConfig from  './default.mjs';
-import {dbFactory, events, validations} from './database.mjs';
+import {dbFactory, validations} from './database.mjs';
 
 
 let defaultHeaders={"Content-Type": "application/json"};
@@ -54,9 +54,9 @@ const crudy= {
         this.currentConfig[entity]=config;
         if(config.validation){
             config.name = entity;
-            config.eventName = events.beforeSave;
             config.function = validations.registerValidation;
-            this.currentConfig.hooks.push(config);
+            this.currentConfig.validations.push(config);
+            validations.init();
         }
     },
     createResponse:  function(response, data){

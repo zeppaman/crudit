@@ -209,6 +209,48 @@ mutations.applyOne('mutation1');
 mutations.applyAll();
 ```
 
+## Data Validation
+It's possible to create server-side validation for your data, verified before insertion in database.
+You can create a validation rule using the createEntity function.
+You need to provide an object with a name and validation rule, using Validator.js sintax.
+You can optionally specify a collection and a database to validate on, for more precise validation. 
+If not provided, the validation will be on all collection of all databases. 
+If you provide only the collection attribute, that collection will be validated in all database.
+If you provide only the database attribute, every collection in the provided database will be validated.
+
+### Example code snippets:
+```js
+import {crudy}  from "../src/index.mjs";
+
+//validate the documents in the collection 'users' in 'admin' database
+crudy.configEntity('adminsRegistrations', {
+    db: 'admin',
+    collection: 'users',
+    validation: {
+        name: 'required',
+        age: 'min:18|required',
+        email: 'email|required'
+    }
+});
+
+//validate the documents in the 'product' collection in all databases
+crudy.configEntity('productsValidity', {
+    collection: 'products',
+    validation: {
+        title: 'required',
+        price: 'min:0.01|required'
+    }
+});
+
+//validate every document in every collection of the 'aggregated' database
+crudy.configEntity('aggregatedGeneration', {
+    db: 'aggregated',
+    validation: {
+        successful: 'true'
+    }
+});
+```
+
 # Installation
 Crudit works at low level so it is compatible with most system. In the next examples we provide the condifuration for bare express installation and vercel serverless function.
 

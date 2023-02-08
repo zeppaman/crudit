@@ -52,17 +52,17 @@ class EventEmitter{
 
     emit(name,database,db,collection,data){
         if(this._events.hasOwnProperty(name)){    
-            this._events[name].forEach(func => {
-                func( database,db,collection,data);
+            this._events[name].forEach(event => {
+                event.func( database,db,collection,data, event.context);
             });
         }
     }
 
-    on(name,func){
+    on(name,func, context){
         if(!this._events.hasOwnProperty(name)){
             this._events[name]=[];
         }
-        this._events[name].push(func);
+        this._events[name].push({func: func, context: context});
     }
 }
 
@@ -96,14 +96,19 @@ let database= {
         }
     },
     insert:async function (db, collection, data){
-        this.emit(events.beforeSave,db,collection,data);
-        if(data._id!=undefined){
-            delete data._id;
-        } 
-        let result=await (await this.dbFactory.getDb(db)).collection(collection).insertOne(data);
-        
-        let saved= await this.get(db,collection,result.insertedId);
-        this.emit(events.afterSave,db,collection,saved);
+        let saved;
+        try {
+            this.emit(events.beforeSave,db,collection,data);
+            if(data._id!=undefined){
+                delete data._id;
+            } 
+            let result=await (await this.dbFactory.getDb(db)).collection(collection).insertOne(data);
+            
+            saved= await this.get(db,collection,result.insertedId);
+            this.emit(events.afterSave,db,collection,saved);
+        } catch (error) {
+            saved = error;
+        }
         return saved;
     },
     patch: async function (db, collection, id, data){
@@ -257,41 +262,22 @@ const mutations ={
 
 const validations = {
     validations: [],
+    events: events,
     database:database,
     dbFactory:dbFactory,
-    emitter: new EventEmitter(),
-    registerValidation: async function(config){
-        if(config.validation && config.collection && config.database){
-            await this.validateOne(config.database, config.collection, config.validation);
-        }else if(config.collection && config.validation){
-            await this.validateCollectionInAllDatabase(config.collection, config.validation);
-        }else if(config.database && config.validation){
-            await this.validateOneDatabase(config.database, config.validation);
-        }else if(config.validation){
-            this.validate(undefined, undefined, config.validation);
+    init: function(){
+        const validationNamesToUpdate = [...new Set(defaultConfig.validations.map((val)=>{return val.name}))];
+        this.validations= [...this.validations.filter((val)=>{return !validationNamesToUpdate.includes(val.name)}), ...defaultConfig.validations];
+        this.validations.filter((val)=>{return !val.isHooked}).forEach((validation)=>{
+            database.emitter.on(this.events.beforeSave, this.validate, validation);
+            validation.isHooked = true;
+        }, this)
+    },
+    validate: function(database,db,collection,data, config){
+        let validation = new Validator(data, config.validation);
+        if( validation.fails() && ((db == config.db || !config.db) && (config.collection == collection || !config.collection)) ){
+            throw validation.errors 
         }
-    },
-    validate: function(dbToValidate, collectionToValidate, validationRules){
-        this.emitter.on(events.beforeSave, (database,db,collection,data)=>{
-            let validation = new Validator(data, validationRules);
-            if( !( (dbToValidate == db || !dbToValidate) && (collectionToValidate == collection || !collection) && validation.passes() ) ){
-                throw {error: 'Invalid data', data: validation.errors }
-            }
-        });
-    },
-    validateOneDatabase: function(dbToValidate, validationRules){
-        this.validate(dbToValidate, undefined, validationRules);
-    },
-    validateCollectionInAllDatabase: async function(collectionToValidate, validationRules){
-        let client = await this.dbFactory.getClient()
-        let databases=client
-        .db()
-        .admin()
-        .listDatabases();
-
-        databases.forEach((x)=>{
-            this.validate(x. collectionToValidate, validationRules);
-        });
     }
 }
 //module.exports=database;
