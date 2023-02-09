@@ -69,6 +69,7 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
     return user;
 });
 
+// collection+db scoped
 crudy.configEntity('testValidation', {
     db: 'testValidationDb',
     collection: 'testCollection',
@@ -77,7 +78,27 @@ crudy.configEntity('testValidation', {
         age: 'min:18|required',
         email: 'email|required'
     }
-})
+});
+
+// collection scoped 
+crudy.configEntity('validation', {
+    collection: 'testCollection',
+    validation: {
+        'age': 'required|min:18',
+        'email': 'required|email'
+    }
+});
+
+//database scoped
+crudy.configEntity('testValidation', {
+    db: 'testValidationDb',
+    collection: 'testCollection',
+    validation: {
+        name: 'required',
+        age: 'min:18|required',
+        email: 'email|required'
+    }
+});
 
 crudy.authorize(async function(request){
 let token=request.headers.authorization ?? request.query.authorization;
@@ -106,13 +127,7 @@ return {
 
 });
 
-crudy.configEntity('validation', {
-    collection: 'testCollection',
-    validation: {
-        'age': 'required|min:18',
-        'email': 'required|email'
-    }
-});
+
 
 crudy.mutation('mutation1',false, async (databaseName,prevExec)=>{
     return(await database.insert(databaseName, 'testlist', {hasError: false}))
