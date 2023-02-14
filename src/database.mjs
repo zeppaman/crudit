@@ -97,18 +97,14 @@ let database= {
     },
     insert:async function (db, collection, data){
         let saved;
-        try {
-            this.emit(events.beforeSave,db,collection,data);
-            if(data._id!=undefined){
-                delete data._id;
-            } 
-            let result=await (await this.dbFactory.getDb(db)).collection(collection).insertOne(data);
-            
-            saved= await this.get(db,collection,result.insertedId);
-            this.emit(events.afterSave,db,collection,saved);
-        } catch (error) {
-            saved = error;
-        }
+        this.emit(events.beforeSave,db,collection,data);
+        if(data._id!=undefined){
+            delete data._id;
+        } 
+        let result=await (await this.dbFactory.getDb(db)).collection(collection).insertOne(data);
+        
+        saved= await this.get(db,collection,result.insertedId);
+        this.emit(events.afterSave,db,collection,saved);
         return saved;
     },
     patch: async function (db, collection, id, data){

@@ -160,6 +160,71 @@ crudy.request("mutation", "post",false,async function(request,loggedUser, settin
     }
 });
 
+crudy.request("validation", "post",false,async function(request,loggedUser, settings){
+    if(request.query.operation=="validate_db"){
+        crudy.configEntity('testValidationDatabase', {
+            db: request.query.database,
+            validation: {
+                name: 'required'
+            }
+        });
+
+        let response = {};
+        response.valid = await database.insert(request.query.database, 'collection1', {'name': 'validData'});
+        response.not_pertinent = await database.insert('other_db', 'collection1', {'not_name': 'invalidData'})
+
+        try{
+            await database.insert(request.query.database, 'collection1', {'not_name': 'invalidData'});
+        }catch(e){
+            response.invalid = e;
+        }
+        return response
+    }else if (request.query.operation=="validate_collection"){
+        crudy.configEntity('testValidationDatabase', {
+            collection: request.query.collection,
+            validation: {
+                name: 'required'
+            }
+        });
+
+        let response = {};
+        response.valid = await database.insert('testdb', request.query.collection, {'name': 'validData'});
+        response.not_pertinent = await database.insert('other_db', 'other_collection', {'not_name': 'invalidData'})
+
+        try{
+            await database.insert('testDb', request.query.collection, {'not_name': 'invalidData'});
+        }catch(e){
+            response.invalid = e;
+        }
+        return response
+    }else if (request.query.operation=="validate_both"){
+        crudy.configEntity('testValidationDatabase', {
+            db: request.query.db,
+            collection: request.query.collection,
+            validation: {
+                name: 'required'
+            }
+        });
+
+        let response = {};
+        response.valid = await database.insert(request.query.db, request.query.collection, {'name': 'validData'});
+        response.not_pertinent_db = await database.insert('other_db', request.query.collection, {'not_name': 'invalidData'});
+        response.not_pertinent_collection = await database.insert(request.query.db, 'other_collection', {'not_name': 'invalidData'});
+        response.not_pertinent_both = await database.insert('other_db', 'other_collection', {'not_name': 'invalidData'});
+
+        try{
+            await database.insert(request.query.db, request.query.collection, {'not_name': 'invalidData'});
+        }catch(e){
+            response.invalid = e;
+        }
+        return response
+    }
+    else
+    {
+        throw new Error("Unauthorized");
+    }
+});
+
 
 
 app.all('/api/handler', async (request, response) => {

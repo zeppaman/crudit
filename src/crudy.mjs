@@ -155,7 +155,7 @@ const crudy= {
         {
             console.log(err);
             payload.hasError=true;            
-            payload.error=err.message;
+            payload.error=err.message ? err.message : err.errors;
             payload.stack=err.stack;
             if(err.name && err.name.length==3 ){
                 payload.status=Number(err.name);
