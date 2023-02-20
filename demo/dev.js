@@ -69,37 +69,6 @@ crudy.request("register", "post",false,async function(request,loggedUser, settin
     return user;
 });
 
-// collection+db scoped
-crudy.configEntity('testValidation', {
-    db: 'testValidationDb',
-    collection: 'testCollection',
-    validation: {
-        name: 'required',
-        age: 'min:18|required',
-        email: 'email|required'
-    }
-});
-
-// collection scoped 
-crudy.configEntity('validation', {
-    collection: 'testCollection',
-    validation: {
-        'age': 'required|min:18',
-        'email': 'required|email'
-    }
-});
-
-//database scoped
-crudy.configEntity('testValidation', {
-    db: 'testValidationDb',
-    collection: 'testCollection',
-    validation: {
-        name: 'required',
-        age: 'min:18|required',
-        email: 'email|required'
-    }
-});
-
 crudy.authorize(async function(request){
 let token=request.headers.authorization ?? request.query.authorization;
 
@@ -160,69 +129,28 @@ crudy.request("mutation", "post",false,async function(request,loggedUser, settin
     }
 });
 
-crudy.request("validation", "post",false,async function(request,loggedUser, settings){
-    if(request.query.operation=="validate_db"){
-        crudy.configEntity('testValidationDatabase', {
-            db: request.query.database,
-            validation: {
-                name: 'required'
-            }
-        });
-
-        let response = {};
-        response.valid = await database.insert(request.query.database, 'collection1', {'name': 'validData'});
-        response.not_pertinent = await database.insert('other_db', 'collection1', {'not_name': 'invalidData'})
-
-        try{
-            await database.insert(request.query.database, 'collection1', {'not_name': 'invalidData'});
-        }catch(e){
-            response.invalid = e;
+crudy.request("validate_both", "post",false,async function(request,loggedUser, settings){
+    console.log('validation both')
+    crudy.configEntity('testValidationDatabase', {
+        db: request.query.db,
+        collection: request.query.collection,
+        validation: {
+            name: 'required'
         }
-        return response
-    }else if (request.query.operation=="validate_collection"){
-        crudy.configEntity('testValidationDatabase', {
-            collection: request.query.collection,
-            validation: {
-                name: 'required'
-            }
-        });
+    });
 
-        let response = {};
-        response.valid = await database.insert('testdb', request.query.collection, {'name': 'validData'});
-        response.not_pertinent = await database.insert('other_db', 'other_collection', {'not_name': 'invalidData'})
+    let response = {};
+    response.valid = await database.insert(request.query.db, request.query.collection, {'name': 'validData'});
+    response.not_pertinent_db = await database.insert('other_db', request.query.collection, {'not_name': 'invalidData'});
+    response.not_pertinent_collection = await database.insert(request.query.db, 'other_collection', {'not_name': 'invalidData'});
+    response.not_pertinent_both = await database.insert('other_db', 'other_collection', {'not_name': 'invalidData'});
 
-        try{
-            await database.insert('testDb', request.query.collection, {'not_name': 'invalidData'});
-        }catch(e){
-            response.invalid = e;
-        }
-        return response
-    }else if (request.query.operation=="validate_both"){
-        crudy.configEntity('testValidationDatabase', {
-            db: request.query.db,
-            collection: request.query.collection,
-            validation: {
-                name: 'required'
-            }
-        });
-
-        let response = {};
-        response.valid = await database.insert(request.query.db, request.query.collection, {'name': 'validData'});
-        response.not_pertinent_db = await database.insert('other_db', request.query.collection, {'not_name': 'invalidData'});
-        response.not_pertinent_collection = await database.insert(request.query.db, 'other_collection', {'not_name': 'invalidData'});
-        response.not_pertinent_both = await database.insert('other_db', 'other_collection', {'not_name': 'invalidData'});
-
-        try{
-            await database.insert(request.query.db, request.query.collection, {'not_name': 'invalidData'});
-        }catch(e){
-            response.invalid = e;
-        }
-        return response
+    try{
+        await database.insert(request.query.db, request.query.collection, {'not_name': 'invalidData'});
+    }catch(e){
+        response.invalid = e;
     }
-    else
-    {
-        throw new Error("Unauthorized");
-    }
+    return response
 });
 
 
