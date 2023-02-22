@@ -1,5 +1,5 @@
 import defaultConfig from  './default.mjs';
-import {dbFactory} from './database.mjs';
+import {dbFactory, validations} from './database.mjs';
 
 
 let defaultHeaders={"Content-Type": "application/json"};
@@ -21,7 +21,7 @@ const crudy= {
 
         this.currentConfig.hooks.push(hook);
     },
-    request:  function (name, method,authenticate,func, init=null){
+    request:  function (name, method,authenticate,func, init=()=>{}){
         let request={
             name: name,
             method:method,
@@ -52,6 +52,12 @@ const crudy= {
     },
     configEntity:   function (entity, config){
         this.currentConfig[entity]=config;
+        if(config.validation){
+            config.name = entity;
+            config.function = validations.registerValidation;
+            this.currentConfig.validations.push(config);
+            validations.init();
+        }
     },
     createResponse:  function(response, data){
         let headers=Object.assign(defaultHeaders,data.headers);
@@ -149,7 +155,7 @@ const crudy= {
         {
             console.log(err);
             payload.hasError=true;            
-            payload.error=err.message;
+            payload.error=err.message ? err.message : err.errors;
             payload.stack=err.stack;
             if(err.name && err.name.length==3 ){
                 payload.status=Number(err.name);

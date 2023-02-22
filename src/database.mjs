@@ -1,10 +1,17 @@
 //const { MongoClient, ServerApiVersion, Document, ObjectID} = require('mongodb');
 import pkg from 'mongodb';
+import Validator from 'validatorjs';
 import defaultConfig from  './default.mjs';
 
 const { MongoClient, ServerApiVersion,} = pkg;
 
-import {EventEmitter} from 'events'
+
+// add this handler before emitting any events
+//TODO: you shouldn't need it
+//process.on('uncaughtException', function (err) {
+//    console.log('UNCAUGHT EXCEPTION - keeping process alive:', err);
+//});
+
 
 const  dbFactory= {
     client: null,
@@ -37,6 +44,28 @@ const  dbFactory= {
 
 };
 
+class EventEmitter{
+    constructor() {
+        this._events={};
+
+    }
+
+    emit(name,database,db,collection,data){
+        if(this._events.hasOwnProperty(name)){    
+            this._events[name].forEach(event => {
+                event.func( database,db,collection,data, event.context);
+            });
+        }
+    }
+
+    on(name,func, context){
+        if(!this._events.hasOwnProperty(name)){
+            this._events[name]=[];
+        }
+        this._events[name].push({func: func, context: context});
+    }
+}
+
 let events={
     alterQuery:"db.alterquery",
     beforeSave:"db.beforesave",
@@ -67,13 +96,14 @@ let database= {
         }
     },
     insert:async function (db, collection, data){
+        let saved;
         this.emit(events.beforeSave,db,collection,data);
         if(data._id!=undefined){
             delete data._id;
         } 
         let result=await (await this.dbFactory.getDb(db)).collection(collection).insertOne(data);
         
-        let saved= await this.get(db,collection,result.insertedId);
+        saved= await this.get(db,collection,result.insertedId);
         this.emit(events.afterSave,db,collection,saved);
         return saved;
     },
@@ -191,7 +221,6 @@ const mutations ={
                 
                 dbmutation= await this.database.insertOrUpdate(databaseName, "_mutations", {dbmutation});
 
-                let testone=await this.database.search(databaseName,"_mutations",{name:mutationName},{});
                 return dbmutation;
             }
         }
@@ -226,6 +255,27 @@ const mutations ={
         });
     }
 };
+
+const validations = {
+    validations: [],
+    events: events,
+    database:database,
+    dbFactory:dbFactory,
+    init: function(){
+        const validationNamesToUpdate = [...new Set(defaultConfig.validations.map((val)=>{return val.name}))];
+        this.validations= [...this.validations.filter((val)=>{return !validationNamesToUpdate.includes(val.name)}), ...defaultConfig.validations];
+        this.validations.filter((val)=>{return !val.isHooked}).forEach((validation)=>{
+            database.emitter.on(this.events.beforeSave, this.validate, validation);
+            validation.isHooked = true;
+        }, this)
+    },
+    validate: function(database,db,collection,data, config){
+        let validation = new Validator(data, config.validation);
+        if( validation.fails() && ((db == config.db || !config.db) && (config.collection == collection || !config.collection)) ){
+            throw validation.errors 
+        }
+    }
+}
 //module.exports=database;
 export default database;
 
@@ -233,5 +283,6 @@ export {
     database,
     events,
     dbFactory,
-    mutations
+    mutations,
+    validations
 };
