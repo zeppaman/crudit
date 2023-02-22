@@ -35,7 +35,7 @@ The project is work in progress but you can:
 - [x] Aggregation and projection support
 - [x] Hook system
 - [ ] Computed fields and data augmentation
-- [ ] Data validation
+- [x] Data validation
 - [x] Audit
 
 ## Configure settings
